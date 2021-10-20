@@ -81,6 +81,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
   filter(value: string): void {
     this.filtered$.next(this.data.filter((item) => this.match(item, value)));
+    this.paginator?.firstPage();
   }
 
   use(xliffDocument: XliffDocument): void {
@@ -143,15 +144,15 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     if (!item || !filter) {
       return true;
     }
-    const filterParts = filter.split(' ');
-    return !filterParts.some(
+    const filterParts = filter.toLowerCase().split(' ');
+    return filterParts.every(
       (part) =>
-        !item.id.includes(part) &&
-        !item.source.includes(part) &&
-        !item.target?.includes(part) &&
-        !item.meaning?.includes(part) &&
-        !item.description?.includes(part) &&
-        !item.state?.includes(part)
+        item.id.toLowerCase().includes(part) ||
+        item.source.toLowerCase().includes(part) ||
+        item.target?.toLowerCase().includes(part) ||
+        item.meaning?.toLowerCase().includes(part) ||
+        item.description?.toLowerCase().includes(part) ||
+        item.state?.toLowerCase().includes(part)
     );
   }
 
