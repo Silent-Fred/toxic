@@ -1,0 +1,123 @@
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTable } from '@angular/material/table';
+import { XliffService } from './../../services/xliff.service';
+import {
+  TranslationUnitTableDataSource,
+  TranslationUnitTableItem,
+} from './translation-unit-table-datasource';
+
+@Component({
+  selector: 'toxic-translation-unit-table',
+  templateUrl: './translation-unit-table.component.html',
+  styleUrls: ['./translation-unit-table.component.scss'],
+})
+export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatTable) table!: MatTable<TranslationUnitTableItem>;
+  dataSource: TranslationUnitTableDataSource;
+
+  displayedColumns = ['translation'];
+
+  form!: FormGroup;
+  private formGroups: { [key: string]: FormGroup } = {};
+
+  get targetLanguage(): string | undefined {
+    return this.xliffService.currentDocument?.targetLanguage;
+  }
+
+  get dubiousLanguage(): boolean {
+    const language = this.form.get('inputTargetLanguage')?.value;
+    return language
+      ? !this.xliffService.isUsualLocaleFormat(language.trim())
+      : false;
+  }
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private xliffService: XliffService // private router: Router
+  ) {
+    this.dataSource = new TranslationUnitTableDataSource();
+  }
+
+  ngOnInit(): void {
+    if (this.xliffService.currentDocument) {
+      this.dataSource?.use(this.xliffService.currentDocument);
+    }
+    this.form = this.formBuilder.group({
+      inputTargetLanguage: new FormControl(
+        this.xliffService.currentDocument?.targetLanguage,
+        []
+      ),
+      translationUnits: this.formBuilder.array([]),
+    });
+    this.form.get('inputTargetLanguage')?.valueChanges.subscribe((event) => {
+      this.setTargetLanguage(event);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
+    this.table.dataSource = this.dataSource;
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter(filterValue.trim().toLowerCase());
+  }
+
+  setTargetLanguage(event: string) {
+    this.xliffService.currentDocument?.setTargetLanguage(event.trim());
+  }
+
+  // TODO
+  // when something changes in the table content, then the formArray should
+  // be rebuilt to avoid piling up form controls for every single item in the
+  // table even if it is not in the current view and will also maybe not be
+  // touched
+  get translationUnits(): FormArray {
+    return this.form.get('translationUnits') as FormArray;
+  }
+
+  formGroup(id: string): FormGroup {
+    let formGroup = this.formGroups[id];
+    if (!formGroup) {
+      formGroup = this.formBuilder.group({ target: new FormControl() });
+      formGroup
+        .get('target')
+        ?.setValue(this.xliffService.translationUnit(id)?.target);
+      formGroup.valueChanges.subscribe((event) =>
+        this.onValueChange(id, event)
+      );
+      this.formGroups[id] = formGroup;
+    }
+    return formGroup;
+  }
+
+  showHints(item: TranslationUnitTableItem): boolean {
+    return this.showMeaning(item) || this.showDescription(item);
+  }
+
+  showMeaning(item: TranslationUnitTableItem): boolean {
+    if (item?.meaning) {
+      return true;
+    }
+    return false;
+  }
+
+  showDescription(item: TranslationUnitTableItem): boolean {
+    if (item?.description) {
+      return true;
+    }
+    return false;
+  }
+
+  private onValueChange(id: string, event: any): void {
+    this.xliffService.currentDocument?.setTranslation(id, event.target);
+    this.dataSource.setTranslation(id, event.target);
+  }
+}

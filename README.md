@@ -1,27 +1,29 @@
-# Toxic
+# TOXIC editor
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.6.
+The open XLIFF internationalisation content editor.
 
-## Development server
+## For whom is this project?
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+It is for those unlucky people who are looking for a tool to work with XLIFF files but are neither
+allowed to install one of the available programs on their (company-) computer and also may not
+have access to paid online services.
 
-## Code scaffolding
+## How does it work?
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+It works as a "single page application". All that you need to work with the translation file is loaded
+right into your browser. The translation files used in the app will always stay on the local machine.
 
-## Build
+## Where can I find a working version?
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+TODO Once I have set up a version either on the private web space or GitHub the link
+will be added here.
 
-## Running unit tests
+## What do I need to modify it or run it on my own server
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+It is a regular Angular application. Read the documentation at the
+[Angular homepage](https://angular.io/) if you're unfamiliar with it.
+The project has a rather liberal license. Grab the source code and do what
+is necessary for your requirements.
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Building, running a development server and all the other nitty-gritty is
+the standard "out of the box" behaviour of Angular projects.

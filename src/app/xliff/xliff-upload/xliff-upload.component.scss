@@ -1,0 +1,26 @@
+.dropZone {
+  padding: 50px;
+  margin: 8em;
+  border-radius: 16px;
+  border: 1px dotted lightgray;
+  text-align: center;
+}
+
+.toxicDropZoneActive {
+  background-color: lightgray;
+  transition: all ease-in-out 0.5s;
+}
+
+.eyecatch {
+  transition: all ease-in-out;
+  animation: pulse 2s ease-in-out 3s infinite alternate-reverse both;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: lightgray;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
