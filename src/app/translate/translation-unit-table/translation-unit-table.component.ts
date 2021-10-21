@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
+import { ValidStates } from './../../model/xliff-document';
 import { XliffService } from './../../services/xliff.service';
 import {
   TranslationUnitTableDataSource,
@@ -114,6 +115,19 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
       return true;
     }
     return false;
+  }
+
+  looksGoodToMe(item: TranslationUnitTableItem): void {
+    this.xliffService.currentDocument?.setState(item.id, ValidStates.final);
+    this.dataSource.confirmReview(item.id);
+  }
+
+  requestReview(item: TranslationUnitTableItem): void {
+    this.xliffService.currentDocument?.setState(
+      item.id,
+      ValidStates.needsReviewTranslation
+    );
+    this.dataSource.requestReview(item.id);
   }
 
   private onValueChange(id: string, event: any): void {

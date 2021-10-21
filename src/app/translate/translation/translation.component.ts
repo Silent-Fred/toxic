@@ -1,4 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { XliffService } from './../../services/xliff.service';
 import { ToxicRoutes } from './../../shared/shared.module';
@@ -10,10 +11,16 @@ import { TranslationUnitTableComponent } from './../translation-unit-table/trans
   styleUrls: ['./translation.component.scss'],
 })
 export class TranslationComponent {
+  @ViewChild('downloadStartedSnackbar')
+  downloadStartedSnackbarTemplate?: TemplateRef<any>;
   @ViewChild(TranslationUnitTableComponent)
   translationUnitTable?: TranslationUnitTableComponent;
 
-  constructor(private xliffService: XliffService, private router: Router) {}
+  constructor(
+    private xliffService: XliffService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {}
 
   close(): void {
     // TODO figure out if a confirm dialogue would be more helpful or harmful,
@@ -24,6 +31,19 @@ export class TranslationComponent {
   }
 
   download(): void {
+    const snackBarConfig = { duration: 3000 };
+    if (!this.downloadStartedSnackbarTemplate) {
+      this.snackBar.open(
+        'The download of your translations has been initiated.',
+        '',
+        snackBarConfig
+      );
+    } else {
+      this.snackBar.openFromTemplate(
+        this.downloadStartedSnackbarTemplate,
+        snackBarConfig
+      );
+    }
     this.downloadAs(
       this.xliffService.currentDocument?.filename || 'messages.xliff'
     );

@@ -12,6 +12,7 @@ export interface TranslationUnitTableItem {
   meaning?: string;
   description?: string;
   state?: string;
+  flaggedForReview?: boolean;
 }
 
 /**
@@ -23,18 +24,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
 
-  validStates = [
-    'final',
-    'needs-adaptation',
-    'needs-l10n',
-    'needs-review-adaptation',
-    'needs-review-l10n',
-    'needs-review-translation',
-    'needs-translation',
-    'new',
-    'signed-off',
-    'translated',
-  ] as const;
+  private readonly reviewedStates = ['final', 'signed-off', 'translated'];
 
   private data: TranslationUnitTableItem[] = [];
 
@@ -98,7 +88,17 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     const item = this.data.find((item) => item.id === id);
     if (item) {
       item.target = translation;
+      item.state = 'translated';
+      item.flaggedForReview = !this.reviewed(item);
     }
+  }
+
+  requestReview(id: string): void {
+    this.setState(id, 'needs-review-translation');
+  }
+
+  confirmReview(id: string): void {
+    this.setState(id, 'final');
   }
 
   /**
@@ -159,40 +159,20 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   private convertModelToTableItem(
     translationUnit: TranslationUnit
   ): TranslationUnitTableItem {
-    return Object.assign({}, translationUnit);
+    const item: TranslationUnitTableItem = Object.assign({}, translationUnit);
+    item.flaggedForReview = !this.reviewed(item);
+    return item;
   }
 
-  /**
-   * This function compares two different states and sorts them according to the
-   * preferred workflow of TOXIC.
-   *
-   * @param stateA
-   * @param stateB
-   */
-  compare(stateA?: string, stateB?: string): number {
-    return this.progessInWorkflow(stateA) - this.progessInWorkflow(stateB);
+  private reviewed(item: TranslationUnitTableItem): boolean {
+    return this.reviewedStates.includes(item.state || '');
   }
 
-  private progessInWorkflow(state?: string): number {
-    if (this.validStates.find((valid) => valid === state)) {
-      switch (state) {
-        case 'new':
-          return 1;
-        case 'needs-adaptation':
-        case 'needs-l10n':
-        case 'needs-translation':
-          return 2;
-        case 'translated':
-          return 3;
-        case 'needs-review-adaptation':
-        case 'needs-review-l10n':
-        case 'needs-review-translation':
-          return 4;
-        case 'final':
-        case 'signed-off':
-          return 5;
-      }
+  private setState(id: string, state: string): void {
+    const item = this.data.find((item) => item.id === id);
+    if (item) {
+      item.state = state;
+      item.flaggedForReview = !this.reviewed(item);
     }
-    return 0;
   }
 }

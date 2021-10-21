@@ -40,3 +40,14 @@
 .description {
   font-size: x-small;
 }
+
+.sourceAndReviewActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: center;
+}
+
+.reviewActions {
+  flex: none;
+}

@@ -1,3 +1,16 @@
+export const ValidStates = {
+  final: 'final',
+  needsAdaptation: 'needs-adaptation',
+  needsL10n: 'needs-l10n',
+  needsReviewAdaptation: 'needs-review-adaptation',
+  needsReviewL10n: 'needs-review-l10n',
+  needsReviewTranslation: 'needs-review-translation',
+  needsTranslation: 'needs-translation',
+  new: 'new',
+  signedOff: 'signed-off',
+  translated: 'translated',
+} as const;
+
 export interface TranslationUnit {
   id: string;
   source: string;
@@ -67,6 +80,20 @@ export class XliffDocument {
       // node, too
       if (translationUnit.node) {
         this.setTarget(translationUnit.node, translation);
+      }
+    }
+  }
+
+  setState(id: string, state: string): void {
+    const translationUnit = this._translationUnits.find(
+      (translationUnit) => translationUnit.id === id
+    );
+    if (translationUnit) {
+      translationUnit.state = state;
+      // if the translation unit is tied to a node, update the
+      // node, too
+      if (translationUnit.node) {
+        this.setStateInNode(translationUnit.node, state);
       }
     }
   }
@@ -222,6 +249,15 @@ export class XliffDocument {
       targetNode = this.addTarget(node);
     }
     targetNode.textContent = target;
+  }
+
+  private setStateInNode(node: Node, state: string): void {
+    let targetNode = this.findTarget(node);
+    if (!targetNode) {
+      targetNode = this.addTarget(node);
+    }
+    const element = targetNode as Element;
+    element.setAttribute('state', state);
   }
 
   private findTarget(node: Node): Node | undefined {
