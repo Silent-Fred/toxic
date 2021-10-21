@@ -31,11 +31,11 @@
             <div class="sourceAndReviewActions">
               <div class="source">{{ item.source }}</div>
               <div class="reviewActions">
-                <button *ngIf="item.flaggedForReview" mat-stroked-button color="primary"
+                <button *ngIf="item.flaggedForReview" mat-stroked-button color="accent"
                   aria-label="Looks good to me button" (click)="looksGoodToMe(item)">
                   <mat-icon svgIcon="checkmark"></mat-icon>Looks good to me
                 </button>
-                <button *ngIf="!item.flaggedForReview" mat-stroked-button color="accent"
+                <button *ngIf="!item.flaggedForReview" mat-stroked-button color="primary"
                   aria-label="Request review button" (click)="requestReview(item)">
                   <mat-icon svgIcon="flag"></mat-icon>Should be reviewed
                 </button>
