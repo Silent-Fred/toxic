@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { XliffDocument } from './../model/xliff-document';
-import { TitleService } from './../services/title.service';
 import { ToxicRoutes } from './../shared/shared.module';
 import { HomeComponent } from './home.component';
 
@@ -17,8 +16,6 @@ export class MockedXliffUploadComponent {}
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
-
-  let titleService = new TitleService();
 
   let router = {
     navigate: jasmine.createSpy('navigate'),
@@ -47,10 +44,7 @@ describe('HomeComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [HomeComponent, MockedXliffUploadComponent],
       imports: [RouterTestingModule],
-      providers: [
-        { provide: Router, useValue: router },
-        { provide: TitleService, useValue: titleService },
-      ],
+      providers: [{ provide: Router, useValue: router }],
     }).compileComponents();
   });
 
@@ -62,22 +56,6 @@ describe('HomeComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should set filename in title if present', () => {
-    const xliffDocument = new XliffDocument(xliff);
-    xliffDocument.filename = 'test-file.xliff';
-    titleService.reset();
-    component.onUpload(xliffDocument);
-    expect(titleService.title).toEqual('test-file.xliff');
-  });
-
-  it('should reset title on incompatible file upload', () => {
-    const xliffDocument = new XliffDocument(xliff);
-    titleService.reset();
-    const title = titleService.title;
-    component.onUpload(xliffDocument);
-    expect(titleService.title).toEqual(title);
   });
 
   it('should navigate to translate after successful upload', () => {

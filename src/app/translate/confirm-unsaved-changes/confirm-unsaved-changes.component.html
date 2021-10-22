@@ -1,0 +1,8 @@
+<h1 mat-dialog-title>Quit Translation</h1>
+<div mat-dialog-content>
+  <p>There are unsaved changes. Do you want to leave anyway?</p>
+</div>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Stay here</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Yes, I want to leave</button>
+</mat-dialog-actions>

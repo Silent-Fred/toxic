@@ -25,6 +25,7 @@ export class XliffDocument {
   private document?: Document;
   private fileNode?: Node;
   private _translationUnits: TranslationUnit[] = [];
+  private _unsavedChanges = false;
 
   filename?: string;
   private _targetLanguage?: string;
@@ -41,6 +42,10 @@ export class XliffDocument {
     return this._translationUnits?.length > 0;
   }
 
+  get unsavedChanges(): boolean {
+    return this._unsavedChanges;
+  }
+
   constructor(xliff?: string) {
     if (xliff) {
       this.parseXliff(xliff);
@@ -55,6 +60,7 @@ export class XliffDocument {
     // nodes and the likes
     this.document = undefined;
     this._translationUnits = [];
+    this._unsavedChanges = false;
     try {
       const parser = new DOMParser();
       this.document = parser.parseFromString(xliff, 'text/xml');
@@ -81,6 +87,7 @@ export class XliffDocument {
       if (translationUnit.node) {
         this.setTarget(translationUnit.node, translation);
       }
+      this._unsavedChanges = true;
     }
   }
 
@@ -95,6 +102,7 @@ export class XliffDocument {
       if (translationUnit.node) {
         this.setStateInNode(translationUnit.node, state);
       }
+      this._unsavedChanges = true;
     }
   }
 
@@ -105,6 +113,7 @@ export class XliffDocument {
         'target-language',
         this._targetLanguage
       );
+      this._unsavedChanges = true;
     }
   }
 
@@ -115,6 +124,10 @@ export class XliffDocument {
     return new Blob([new XMLSerializer().serializeToString(this.document)], {
       type: 'application/x-xliff+xml',
     });
+  }
+
+  acceptUnsavedChanges(): void {
+    this._unsavedChanges = false;
   }
 
   private evaluateXliffNode(node: Node): TranslationUnit[] {

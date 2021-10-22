@@ -3,7 +3,11 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { TranslationUnit, XliffDocument } from './../../model/xliff-document';
+import {
+  TranslationUnit,
+  ValidStates,
+  XliffDocument,
+} from './../../model/xliff-document';
 
 export interface TranslationUnitTableItem {
   id: string;
@@ -24,7 +28,11 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
 
-  private readonly reviewedStates = ['final', 'signed-off', 'translated'];
+  private readonly reviewedStates: string[] = [
+    ValidStates.final,
+    ValidStates.signedOff,
+    ValidStates.translated,
+  ];
 
   private data: TranslationUnitTableItem[] = [];
 
@@ -88,17 +96,19 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     const item = this.data.find((item) => item.id === id);
     if (item) {
       item.target = translation;
-      item.state = 'translated';
+      // The app supports only a simple workflow where 'translated'
+      // also means 'final'. Reviews have to be requested explicitly.
+      item.state = ValidStates.final;
       item.flaggedForReview = !this.reviewed(item);
     }
   }
 
   requestReview(id: string): void {
-    this.setState(id, 'needs-review-translation');
+    this.setState(id, ValidStates.needsReviewTranslation);
   }
 
   confirmReview(id: string): void {
-    this.setState(id, 'final');
+    this.setState(id, ValidStates.final);
   }
 
   /**
@@ -129,14 +139,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
     return data.sort((a, b) => {
       const isAsc = this.sort?.direction === 'asc';
-      // const stepInWorkflow = this.compare(a.state, b.state) * (isAsc ? 1 : -1);
-      // TODO sorting accoring to a workflow might be an issue for later versions,
-      // although it's not clear if that really makes awfully sense compared to
-      // solving the use case with filter abilities.
-      const stepInWorkflow = 0;
-      return stepInWorkflow !== 0
-        ? stepInWorkflow
-        : (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
     });
   }
 

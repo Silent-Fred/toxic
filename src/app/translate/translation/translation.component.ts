@@ -1,8 +1,10 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { XliffService } from './../../services/xliff.service';
 import { ToxicRoutes } from './../../shared/shared.module';
+import { ConfirmUnsavedChangesComponent } from './../confirm-unsaved-changes/confirm-unsaved-changes.component';
 import { TranslationUnitTableComponent } from './../translation-unit-table/translation-unit-table.component';
 
 @Component({
@@ -19,15 +21,24 @@ export class TranslationComponent {
   constructor(
     private xliffService: XliffService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
+  get filename(): string {
+    return this.xliffService.currentDocument?.filename ?? '';
+  }
+
+  get unsavedChanges(): boolean {
+    return this.xliffService.currentDocument?.unsavedChanges ?? false;
+  }
+
   close(): void {
-    // TODO figure out if a confirm dialogue would be more helpful or harmful,
-    // if an "autosave" in case of unsaved changes would be annoying (because
-    // it would mean to deal with the file save dialogue) or nice.
-    // this.downloadAs('toxic_autosave.xliff');
-    this.router.navigate([ToxicRoutes.home]);
+    if (this.xliffService.currentDocument?.unsavedChanges) {
+      this.confirmUnsavedChanges();
+    } else {
+      this.closeConfirmed();
+    }
   }
 
   download(): void {
@@ -49,9 +60,24 @@ export class TranslationComponent {
     );
   }
 
+  private confirmUnsavedChanges() {
+    const dialogRef = this.dialog.open(ConfirmUnsavedChangesComponent);
+    dialogRef.afterClosed().subscribe((leave) => {
+      if (leave) {
+        this.closeConfirmed();
+      }
+    });
+  }
+
+  private closeConfirmed(): void {
+    this.xliffService.clear();
+    this.router.navigate([ToxicRoutes.home]);
+  }
+
   private downloadAs(name: string): void {
     const blob = this.xliffService.currentDocument?.asBlob();
     if (blob) {
+      this.xliffService.currentDocument?.acceptUnsavedChanges();
       const a = document.createElement('a');
       const objectUrl = URL.createObjectURL(blob);
       a.href = objectUrl;

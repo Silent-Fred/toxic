@@ -2,7 +2,6 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { TitleService } from './../services/title.service';
 
 @Component({
   selector: 'toxic-sidebar',
@@ -17,12 +16,5 @@ export class SidebarComponent {
       shareReplay()
     );
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    private titleService: TitleService
-  ) {}
-
-  get title(): string {
-    return this.titleService.title;
-  }
+  constructor(private breakpointObserver: BreakpointObserver) {}
 }

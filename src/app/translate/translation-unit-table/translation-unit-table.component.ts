@@ -39,7 +39,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private xliffService: XliffService // private router: Router
+    private xliffService: XliffService
   ) {
     this.dataSource = new TranslationUnitTableDataSource();
   }

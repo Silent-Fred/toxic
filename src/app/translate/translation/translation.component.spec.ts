@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslationComponent } from './translation.component';
@@ -30,7 +31,7 @@ describe('TranslationComponent', () => {
         MockedTranslationUnitTableComponent,
         MockedMatIconComponent,
       ],
-      imports: [RouterTestingModule, MatSnackBarModule],
+      imports: [RouterTestingModule, MatSnackBarModule, MatDialogModule],
     }).compileComponents();
   });
 

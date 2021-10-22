@@ -1,4 +1,4 @@
-# TOXIC editor
+# TOXIC Editor
 
 The open XLIFF internationalisation content editor.
 

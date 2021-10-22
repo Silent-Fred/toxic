@@ -1,13 +1,20 @@
-<div class="translationActions">
-  <div class="translationActionIcon">
-    <button mat-icon-button color="primary" aria-label="Download button" (click)="download()">
-      <mat-icon svgIcon="share"></mat-icon>
-    </button>
+<div class="translationHeading">
+  <div class="translationHeadingFilename">
+    <span>{{filename}}</span><span *ngIf="unsavedChanges" class="unsavedChangesMarker">&bull;</span>
   </div>
-  <div class="translationActionIcon">
-    <button mat-icon-button color="primary" aria-label="Close button" (click)="close()">
-      <mat-icon svgIcon="close"></mat-icon>
-    </button>
+  <div class="translationActionContainer">
+    <div class="translationActions">
+      <div class="translationActionIcon">
+        <button mat-icon-button color="primary" aria-label="Download button" (click)="download()">
+          <mat-icon svgIcon="share"></mat-icon>
+        </button>
+      </div>
+      <div class="translationActionIcon">
+        <button mat-icon-button color="primary" aria-label="Close button" (click)="close()">
+          <mat-icon svgIcon="close"></mat-icon>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
