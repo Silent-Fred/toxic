@@ -4,7 +4,7 @@ The open XLIFF internationalisation content editor.
 
 ## For whom is this project?
 
-It is for those unlucky people who are looking for a tool to work with XLIFF files but are neither
+It is for those unfortunate people who are looking for a tool to work with XLIFF files but are neither
 allowed to install one of the available programs on their (company-) computer and also may not
 have access to paid online services.
 
@@ -15,8 +15,7 @@ right into your browser. The translation files used in the app will always stay 
 
 ## Where can I find a working version?
 
-TODO Once I have set up a version either on the private web space or GitHub the link
-will be added here.
+A working version can be found on [GitHub Pages](https://silent-fred.github.io/toxic)
 
 ## What do I need to modify it or run it on my own server
 
