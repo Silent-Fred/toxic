@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ToxicRoutes } from './shared/shared.module';
 import { TranslationComponent } from './translate/translation/translation.component';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 const routes: Routes = [
   {
@@ -12,6 +13,10 @@ const routes: Routes = [
   {
     path: ToxicRoutes.translate,
     component: TranslationComponent,
+  },
+  {
+    path: ToxicRoutes.tutorial,
+    component: TutorialComponent,
   },
   {
     path: '**',

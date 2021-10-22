@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { HomeModule } from './home/home.module';
 import { SidebarModule } from './sidebar/sidebar.module';
 import { TranslateModule } from './translate/translate.module';
+import { TutorialModule } from './tutorial/tutorial.module';
 import { XliffModule } from './xliff/xliff.module';
 
 @NgModule({
@@ -17,6 +18,7 @@ import { XliffModule } from './xliff/xliff.module';
     TranslateModule,
     HomeModule,
     XliffModule,
+    TutorialModule,
     AppRoutingModule,
   ],
   providers: [],

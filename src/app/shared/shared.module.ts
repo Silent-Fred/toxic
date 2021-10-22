@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 export const ToxicRoutes = {
   home: 'home',
   translate: 'translate',
+  tutorial: 'tutorial',
 } as const;
 
 @NgModule({
