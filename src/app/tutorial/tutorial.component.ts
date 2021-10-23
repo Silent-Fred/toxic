@@ -42,7 +42,7 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
     </trans-unit>
     <trans-unit id="the.unique.identifiers.8" datatype="html">
       <source>I think I got the basics now. How do I save my translations?</source>
-      <target state="translated">In the upper right corner there are two icons. The left one, the "share" icon will download an XLIFF file with all your translation.</target>
+      <target state="translated">In the upper right corner there are several icons. The left one, the "share" icon will download an XLIFF file with all your translations.</target>
       <note priority="1" from="description">Some browsers will ask for a location, some depending on configuration, some will take quite a while before they actually start the download... just try how your preferred browser works.</note>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.9" datatype="html">
@@ -57,10 +57,15 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
       <note priority="1" from="meaning">Just different possibilities, choose whichever you prefer.</note>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.11" datatype="html">
+      <source>Is it so difficult to count to three? What's the big mystery of that "grid" icon between the share and close icons?</source>
+      <target state="translated">This icon will switch between a layout with original text and translation either next to each other or line by line.</target>
+      <note priority="1" from="meaning">There are three kinds of people. Those that are good at maths and those that are not.</note>
+    </trans-unit>
+    <trans-unit id="the.unique.identifiers.12" datatype="html">
       <source>You forgot to explain the "Target Language" input field.</source>
       <target state="translated">Ah okay. If you need a completely new language file, you can change the target language in this field, then translate all texts and finally download the result.</target>
     </trans-unit>
-    <trans-unit id="the.unique.identifiers.12" datatype="html">
+    <trans-unit id="the.unique.identifiers.14" datatype="html">
       <source>That's all folks.</source>
       <target state="translated">Cheers, Silent Fred</target>
     </trans-unit>

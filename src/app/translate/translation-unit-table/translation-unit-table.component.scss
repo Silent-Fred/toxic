@@ -15,6 +15,10 @@
   font-weight: bold;
 }
 
+.translationUnitTableCell {
+  margin-top: 0.5ex;
+}
+
 .id {
   font-size: x-small;
 }
@@ -41,7 +45,7 @@
   font-size: x-small;
 }
 
-.sourceAndReviewActions {
+.idAndReviewActions {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -50,4 +54,15 @@
 
 .reviewActions {
   flex: none;
+}
+
+.sourceAndTargetContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.sourceAndTarget {
+  flex: 1 1 50%;
 }

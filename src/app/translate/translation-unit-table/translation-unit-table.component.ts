@@ -21,6 +21,14 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   @ViewChild(MatTable) table!: MatTable<TranslationUnitTableItem>;
   dataSource: TranslationUnitTableDataSource;
 
+  columnLayout = false;
+  get rowLayout(): boolean {
+    return !this.columnLayout;
+  }
+  set rowLayout(value: boolean) {
+    this.columnLayout = !value;
+  }
+
   displayedColumns = ['translation'];
 
   form!: FormGroup;
@@ -58,12 +66,24 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
     this.form.get('inputTargetLanguage')?.valueChanges.subscribe((event) => {
       this.setTargetLanguage(event);
     });
+    if (localStorage.getItem('toxic-view-orientation') === 'columnLayout') {
+      this.columnLayout = true;
+    }
   }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
     this.table.dataSource = this.dataSource;
+  }
+
+  switchViewOrientation(): void {
+    this.columnLayout = !this.columnLayout;
+    if (this.columnLayout) {
+      localStorage.setItem('toxic-view-orientation', 'columnLayout');
+    } else {
+      localStorage.setItem('toxic-view-orientation', 'rowLayout');
+    }
   }
 
   applyFilter(event: Event) {

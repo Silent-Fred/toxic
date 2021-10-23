@@ -33,6 +33,10 @@ export class TranslationComponent {
     return this.xliffService.currentDocument?.unsavedChanges ?? false;
   }
 
+  switchViewOrientation(): void {
+    this.translationUnitTable?.switchViewOrientation();
+  }
+
   close(): void {
     if (this.xliffService.currentDocument?.unsavedChanges) {
       this.confirmUnsavedChanges();
