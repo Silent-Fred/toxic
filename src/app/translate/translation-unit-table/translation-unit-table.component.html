@@ -28,7 +28,9 @@
             <div class="translationUnitTableCell">
               <div class="idAndReviewActions">
                 <div>
-                  <span class="label id">ID</span><span class="id">{{ item.id }}</span>
+                  <mat-icon *ngIf="item.complex === true" svgIcon="hand-left"
+                    matTooltip="This translation item is a complex thing, not just text. Maybe with pluralisation or other fancy stuff. This is not yet supported for editing.">
+                  </mat-icon><span class="label id">ID</span><span class="id">{{ item.id }}</span>
                 </div>
                 <div class="reviewActions">
                   <button *ngIf="item.flaggedForReview" mat-stroked-button color="accent"
@@ -52,14 +54,6 @@
                   </mat-form-field>
                 </div>
               </div>
-              <!-- <div class="sourceAndReviewActions">
-                <div class="source">{{ item.source }}</div>
-              </div> -->
-              <!-- <mat-form-field appearance="standard" class="full-width">
-                <mat-icon matSuffix *ngIf="item.flaggedForReview" svgIcon="flag"></mat-icon>
-                <textarea matInput formControlName="target" cdkTextareaAutosize cdkAutosizeMinRows="1"
-                  cdkAutosizeMaxRows="5"></textarea>
-              </mat-form-field> -->
               <div *ngIf="showHints(item)" class="hintsContainer">
                 <span class="label hints">Translation hints</span>
                 <div *ngIf="showMeaning(item)">

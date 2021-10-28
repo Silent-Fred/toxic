@@ -107,10 +107,12 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   formGroup(id: string): FormGroup {
     let formGroup = this.formGroups[id];
     if (!formGroup) {
-      formGroup = this.formBuilder.group({ target: new FormControl() });
-      formGroup
-        .get('target')
-        ?.setValue(this.xliffService.translationUnit(id)?.target);
+      const translationUnit = this.xliffService.translationUnit(id);
+      const targetFormControl = new FormControl({
+        value: translationUnit?.target,
+        disabled: translationUnit?.complexNode === true,
+      });
+      formGroup = this.formBuilder.group({ target: targetFormControl });
       formGroup.valueChanges.subscribe((event) =>
         this.onValueChange(id, event)
       );

@@ -17,6 +17,7 @@ export interface TranslationUnitTableItem {
   description?: string;
   state?: string;
   flaggedForReview?: boolean;
+  complex?: boolean;
 }
 
 /**
@@ -164,6 +165,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   ): TranslationUnitTableItem {
     const item: TranslationUnitTableItem = Object.assign({}, translationUnit);
     item.flaggedForReview = !this.reviewed(item);
+    item.complex = translationUnit.complexNode === true;
     return item;
   }
 

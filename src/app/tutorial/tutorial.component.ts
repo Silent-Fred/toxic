@@ -12,7 +12,7 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
       <target state="translated">Hello. Let us take a look at how this application can be used to your benefit.</target>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.2" datatype="html">
-      <source>The original text in the source language is displayed in this row.</source>
+      <source>The original text in the source language is displayed in this area.</source>
       <target state="translated">Type your translation in this field.</target>
       <note priority="1" from="description">If a descriptive text for this translation unit has been given it will show up here.</note>
       <note priority="1" from="meaning">If the meaning of this translation unit has been given it will show up here.</note>
@@ -59,7 +59,7 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
     <trans-unit id="the.unique.identifiers.11" datatype="html">
       <source>Is it so difficult to count to three? What's the big mystery of that "grid" icon between the share and close icons?</source>
       <target state="translated">This icon will switch between a layout with original text and translation either next to each other or line by line.</target>
-      <note priority="1" from="meaning">There are three kinds of people. Those that are good at maths and those that are not.</note>
+      <note priority="1" from="meaning">There are three kinds of people. Those who are good at maths and those who are not.</note>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.12" datatype="html">
       <source>You forgot to explain the "Target Language" input field.</source>

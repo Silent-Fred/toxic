@@ -18,6 +18,7 @@ export interface TranslationUnit {
   meaning?: string;
   description?: string;
   state?: string;
+  complexNode: boolean;
   node?: Node;
 }
 
@@ -82,9 +83,13 @@ export class XliffDocument {
     );
     if (translationUnit) {
       translationUnit.target = translation;
-      // if the translation unit is tied to a node, update the
-      // node, too
-      if (translationUnit.node) {
+      // If the translation unit is tied to a node, update the
+      // node, too.
+      // TODO so far only for siple nodes without e.g. plurals
+      if (
+        translationUnit.node &&
+        !this.isComplexTranslationUnit(translationUnit.node)
+      ) {
         this.setTarget(translationUnit.node, translation);
       }
       this._unsavedChanges = true;
@@ -100,7 +105,10 @@ export class XliffDocument {
       // if the translation unit is tied to a node, update the
       // node, too
       if (translationUnit.node) {
-        this.setStateInNode(translationUnit.node, state);
+        const targetNode = this.findTarget(translationUnit.node);
+        if (targetNode) {
+          this.setStateInNode(targetNode, state);
+        }
       }
       this._unsavedChanges = true;
     }
@@ -159,6 +167,7 @@ export class XliffDocument {
       if (childNode.nodeName === 'trans-unit') {
         const translationUnit = this.evaluateTransUnitNode(childNode);
         if (translationUnit) {
+          console.log(translationUnit);
           translationUnits.push(translationUnit);
         }
       }
@@ -175,6 +184,10 @@ export class XliffDocument {
     if (!id || !source) {
       return null;
     }
+    let target = this.findTarget(node);
+    if (!target) {
+      target = this.addTarget(node);
+    }
     return {
       id,
       source,
@@ -182,6 +195,7 @@ export class XliffDocument {
       state: this.evaluateTargetState(node),
       meaning: this.evaluateMeaning(node),
       description: this.evaluateDescription(node),
+      complexNode: this.isComplexTranslationUnit(node),
       node,
     } as TranslationUnit;
   }
@@ -192,35 +206,22 @@ export class XliffDocument {
   }
 
   private evaluateSource(node: Node): string | null {
-    let source: string | null = null;
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'source') {
-        source = childNode.textContent;
-      }
-    });
-    return source;
+    const textContent = this.findSource(node)?.textContent;
+    return textContent ? textContent : null;
   }
 
   private evaluateTarget(node: Node): string | null {
-    let target: string | null = null;
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'target') {
-        target = childNode.textContent;
-      }
-    });
-    return target;
+    const textContent = this.findTarget(node)?.textContent;
+    return textContent ? textContent : null;
   }
 
   private evaluateTargetState(node: Node): string | null {
     let state: string | null = null;
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'target') {
-        const element = childNode as Element;
-        state = element?.hasAttribute('state')
-          ? element.getAttribute('state')
-          : null;
-      }
-    });
+    const targetNode = this.findTarget(node);
+    const element = targetNode as Element;
+    state = element?.hasAttribute('state')
+      ? element.getAttribute('state')
+      : null;
     return state;
   }
 
@@ -257,6 +258,8 @@ export class XliffDocument {
   }
 
   private setTarget(node: Node, target: string): void {
+    // TODO this only works for simple nodes, not for complex
+    // targets like e.g. with a pluralisation
     let targetNode = this.findTarget(node);
     if (!targetNode) {
       targetNode = this.addTarget(node);
@@ -265,27 +268,52 @@ export class XliffDocument {
   }
 
   private setStateInNode(node: Node, state: string): void {
-    let targetNode = this.findTarget(node);
-    if (!targetNode) {
-      targetNode = this.addTarget(node);
-    }
-    const element = targetNode as Element;
+    const element = node as Element;
+    console.log(element);
     element.setAttribute('state', state);
+    console.log(element);
+  }
+
+  private findSource(node: Node): Node | undefined {
+    return this.findChildByNodeName(node, 'source');
   }
 
   private findTarget(node: Node): Node | undefined {
-    let targetNode;
+    return this.findChildByNodeName(node, 'target');
+  }
+
+  private findChildByNodeName(node: Node, nodeName: string): Node | undefined {
+    let foundNode;
     node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'target') {
-        targetNode = childNode;
+      if (childNode.nodeName === nodeName) {
+        foundNode = childNode;
       }
     });
-    return targetNode;
+    return foundNode;
+  }
+
+  private isComplexTranslationUnit(node: Node): boolean {
+    return this.isComplexNode(this.findSource(node));
+  }
+
+  private isComplexNode(node: Node | undefined | null): boolean {
+    if (!node || !node.hasChildNodes()) {
+      return false;
+    }
+    if (node.firstChild?.isSameNode(node.lastChild)) {
+      return false;
+    }
+    return true;
   }
 
   private addTarget(node: Node): Node {
-    const targetNode = { nodeName: 'target' } as Node;
-    node.appendChild(targetNode);
-    return targetNode;
+    const targetNode = this.document?.createElement('target');
+    this.setStateInNode(targetNode as Node, ValidStates.new);
+    node.appendChild(targetNode as Node);
+    const sourceNode = this.findSource(node);
+    sourceNode?.childNodes.forEach((childNode) => {
+      (targetNode as Node).appendChild(childNode.cloneNode(true));
+    });
+    return targetNode as Node;
   }
 }
