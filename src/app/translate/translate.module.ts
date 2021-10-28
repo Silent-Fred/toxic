@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
@@ -30,6 +31,7 @@ import { TranslationComponent } from './translation/translation.component';
     MatInputModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSlideToggleModule,
     MatSnackBarModule,
     MatSortModule,
     MatTooltipModule,

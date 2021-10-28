@@ -66,3 +66,14 @@
 .sourceAndTarget {
   flex: 1 1 50%;
 }
+
+.left-and-right {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+}
+
+.reviewModeSlideToggle {
+  margin-right: 1em;
+}

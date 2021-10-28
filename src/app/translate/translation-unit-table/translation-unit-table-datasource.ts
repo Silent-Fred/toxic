@@ -43,6 +43,11 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     return this.filtered$.value;
   }
 
+  private reviewMode$ = new BehaviorSubject<boolean>(false);
+  set reviewMode(value: boolean) {
+    this.reviewMode$.next(value);
+  }
+
   constructor() {
     super();
   }
@@ -58,6 +63,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
       // stream for the data-table to consume.
       return merge(
         this.filtered$,
+        this.reviewMode$,
         this.paginator.page,
         this.sort.sortChange
       ).pipe(
@@ -134,13 +140,19 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   private getSortedData(
     data: TranslationUnitTableItem[]
   ): TranslationUnitTableItem[] {
-    if (!this.sort || !this.sort.active || this.sort.direction === '') {
+    if (
+      (!this.sort || !this.sort.active || this.sort.direction === '') &&
+      !this.reviewMode$.value
+    ) {
       return data;
     }
 
     return data.sort((a, b) => {
       const isAsc = this.sort?.direction === 'asc';
-      return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      if (a.flaggedForReview === b.flaggedForReview) {
+        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      }
+      return a.flaggedForReview ? -1 : 1;
     });
   }
 

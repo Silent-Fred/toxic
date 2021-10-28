@@ -1,16 +1,23 @@
 <form [formGroup]="form" autocomplete="off">
 
-  <div>
-    <span>
-      <mat-form-field appearance="standard">
-        <mat-label>Target Language</mat-label>
-        <input matInput placeholder="the translations are for the language..." formControlName="inputTargetLanguage" />
-      </mat-form-field>
-    </span>
-    <span *ngIf="dubiousLanguage">
-      <mat-icon svgIcon="warning"
-        matTooltip="This doesn't look like a typical language code. I hope you know what you are doing."></mat-icon>
-    </span>
+  <div class="left-and-right">
+    <div>
+      <span>
+        <mat-form-field appearance="standard">
+          <mat-label>Target Language</mat-label>
+          <input matInput placeholder="the translations are for the language..."
+            formControlName="inputTargetLanguage" />
+        </mat-form-field>
+      </span>
+      <span *ngIf="dubiousLanguage">
+        <mat-icon svgIcon="warning"
+          matTooltip="This doesn't look like a typical language code. I hope you know what you are doing."></mat-icon>
+      </span>
+    </div>
+    <div class="reviewModeSlideToggle">
+      <mat-slide-toggle color="primary" [checked]="reviewMode" (change)="toggleReviewMode($event)">Review Mode
+      </mat-slide-toggle>
+    </div>
   </div>
 
   <mat-form-field appearance="standard" class="full-width">

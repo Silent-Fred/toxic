@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { ValidStates } from './../../model/xliff-document';
@@ -30,6 +31,8 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   displayedColumns = ['translation'];
+
+  reviewMode = false;
 
   form!: FormGroup;
   private formGroups: { [key: string]: FormGroup } = {};
@@ -150,6 +153,11 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
       ValidStates.needsReviewTranslation
     );
     this.dataSource.requestReview(item.id);
+  }
+
+  toggleReviewMode(event: MatSlideToggleChange): void {
+    this.reviewMode = event?.checked === true;
+    this.dataSource.reviewMode = this.reviewMode;
   }
 
   private onValueChange(id: string, event: any): void {
