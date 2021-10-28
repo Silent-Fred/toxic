@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -31,6 +32,7 @@ describe('TranslationUnitTableComponent', () => {
           MatSortModule,
           MatTableModule,
           MatInputModule,
+          MatSlideToggleModule,
           ReactiveFormsModule,
           RouterTestingModule,
         ],
