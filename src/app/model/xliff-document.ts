@@ -167,7 +167,6 @@ export class XliffDocument {
       if (childNode.nodeName === 'trans-unit') {
         const translationUnit = this.evaluateTransUnitNode(childNode);
         if (translationUnit) {
-          console.log(translationUnit);
           translationUnits.push(translationUnit);
         }
       }
@@ -269,9 +268,7 @@ export class XliffDocument {
 
   private setStateInNode(node: Node, state: string): void {
     const element = node as Element;
-    console.log(element);
     element.setAttribute('state', state);
-    console.log(element);
   }
 
   private findSource(node: Node): Node | undefined {
