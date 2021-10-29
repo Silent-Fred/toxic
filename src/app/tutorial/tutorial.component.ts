@@ -66,8 +66,16 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
       <target state="translated">Ah okay. If you need a completely new language file, you can change the target language in this field, then translate all texts and finally download the result.</target>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.14" datatype="html">
+      <source>Anything else? Like maybe this switch for a "Review Mode" in the upper right area, below those redoubtable close, grid and share icons?</source>
+      <target state="translated">Well, yes, in review mode the translations for which a review has been suggested are shown before others.</target>
+    </trans-unit>
+    <trans-unit id="the.unique.identifiers.15" datatype="html">
       <source>That's all folks.</source>
       <target state="translated">Cheers, Silent Fred</target>
+    </trans-unit>
+    <trans-unit id="the.unique.identifiers.16" datatype="html">
+      <source>P.S.: If you see me raise my hand to stop you from editing a translation...<x id="dummy"/></source>
+      <target state="translated">...it is because the text contains not only text but a more complex translation item. This will - hopefully - be supported in future versions, but it is not yet.</target>
     </trans-unit>
   </body>
 </file>
