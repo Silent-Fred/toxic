@@ -89,13 +89,14 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     this.paginator?.firstPage();
   }
 
-  use(xliffDocument: XliffDocument): void {
+  use(xliffDocument: XliffDocument | undefined): void {
+    this.data =
+      xliffDocument?.translationUnits?.map((translationUnit) =>
+        this.convertModelToTableItem(translationUnit)
+      ) ?? [];
     // Reset filtering when a new document is opened. We might also
     // consider to keep a filter "alive" we'd just have to recalculate
     // the filtered content in that case.
-    this.data = xliffDocument?.translationUnits?.map((translationUnit) =>
-      this.convertModelToTableItem(translationUnit)
-    );
     this.filter('');
   }
 
@@ -116,6 +117,10 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
   confirmReview(id: string): void {
     this.setState(id, ValidStates.final);
+  }
+
+  findItemById(id: string): TranslationUnitTableItem | undefined {
+    return this.data?.find((item) => item.id === id);
   }
 
   /**

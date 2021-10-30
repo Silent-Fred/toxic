@@ -19,28 +19,24 @@ export interface TranslationUnit {
   description?: string;
   state?: string;
   complexNode: boolean;
-  node?: Node;
 }
 
 export class XliffDocument {
-  private document?: Document;
-  private fileNode?: Node;
-  private _translationUnits: TranslationUnit[] = [];
+  private xliffDocument?: Document;
   private _unsavedChanges = false;
 
   filename?: string;
-  private _targetLanguage?: string;
 
   get targetLanguage(): string | undefined {
-    return this._targetLanguage;
+    return this.getTargetLanguage(this.xliffDocument);
   }
 
   get translationUnits(): TranslationUnit[] {
-    return [...this._translationUnits];
+    return [...this.getTranslationUnits(this.xliffDocument)];
   }
 
   get valid(): boolean {
-    return this._translationUnits?.length > 0;
+    return this.xliffDocument !== undefined;
   }
 
   get unsavedChanges(): boolean {
@@ -56,147 +52,113 @@ export class XliffDocument {
   parseXliff(xliff: string): void {
     // In case we deal with files, not strings:
     // var xmlhttp = new XMLHttpRequest();
-    // Using XPaths and document.evaluate() miight be another
+    // Using XPaths and document.evaluate() might be another
     // approach, but let's just try it with the DOM tree and
     // nodes and the likes
-    this.document = undefined;
-    this._translationUnits = [];
+    this.xliffDocument = undefined;
     this._unsavedChanges = false;
     try {
       const parser = new DOMParser();
-      this.document = parser.parseFromString(xliff, 'text/xml');
-      const rootNode = this.document.getRootNode() as Node;
-      rootNode.childNodes.forEach((childNode) => {
-        if (childNode.nodeName === 'xliff') {
-          this._translationUnits.push(...this.evaluateXliffNode(childNode));
-        }
-      });
+      this.xliffDocument = parser.parseFromString(xliff, 'text/xml');
     } catch (e) {
-      this.document = undefined;
-      this._translationUnits = [];
+      this.xliffDocument = undefined;
     }
   }
 
   setTranslation(id: string, translation: string): void {
-    const translationUnit = this._translationUnits.find(
-      (translationUnit) => translationUnit.id === id
-    );
-    if (translationUnit) {
-      translationUnit.target = translation;
-      // If the translation unit is tied to a node, update the
-      // node, too.
-      // TODO so far only for siple nodes without e.g. plurals
-      if (
-        translationUnit.node &&
-        !this.isComplexTranslationUnit(translationUnit.node)
-      ) {
-        this.setTarget(translationUnit.node, translation);
-      }
-      this._unsavedChanges = true;
+    const node = this.xliffDocument?.getElementById(id);
+    // TODO so far only for simple nodes without e.g. plurals
+    if (node && !this.isComplexTranslationUnit(node)) {
+      this.setTarget(node, translation);
     }
+    this._unsavedChanges = true;
   }
 
   setState(id: string, state: string): void {
-    const translationUnit = this._translationUnits.find(
-      (translationUnit) => translationUnit.id === id
-    );
-    if (translationUnit) {
-      translationUnit.state = state;
-      // if the translation unit is tied to a node, update the
-      // node, too
-      if (translationUnit.node) {
-        const targetNode = this.findTarget(translationUnit.node);
-        if (targetNode) {
-          this.setStateInNode(targetNode, state);
-        }
+    const node = this.xliffDocument?.getElementById(id);
+    if (node) {
+      const targetNode = this.findTarget(node);
+      if (targetNode) {
+        this.setStateInNode(targetNode, state);
       }
-      this._unsavedChanges = true;
     }
+    this._unsavedChanges = true;
   }
 
   setTargetLanguage(targetLanguage: string): void {
-    this._targetLanguage = targetLanguage || '';
-    if (this.fileNode) {
-      (this.fileNode as Element).setAttribute(
-        'target-language',
-        this._targetLanguage
-      );
-      this._unsavedChanges = true;
-    }
+    const fileNode = this.findFirstFileNode(this.xliffDocument);
+    (fileNode as Element)?.setAttribute('target-language', targetLanguage);
+    this._unsavedChanges = true;
   }
 
   asBlob(): Blob {
-    if (!this.document) {
+    if (!this.xliffDocument) {
       return new Blob();
     }
-    return new Blob([new XMLSerializer().serializeToString(this.document)], {
-      type: 'application/x-xliff+xml',
-    });
+    return new Blob(
+      [new XMLSerializer().serializeToString(this.xliffDocument)],
+      {
+        type: 'application/x-xliff+xml',
+      }
+    );
   }
 
   acceptUnsavedChanges(): void {
     this._unsavedChanges = false;
   }
 
-  private evaluateXliffNode(node: Node): TranslationUnit[] {
+  private getTranslationUnits(
+    xliffDocument: Document | undefined
+  ): TranslationUnit[] {
     const translationUnits: TranslationUnit[] = [];
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'file') {
-        translationUnits.push(...this.evaluateFileNode(childNode));
-      }
-    });
+    const transUnitTags = xliffDocument?.querySelectorAll(
+      'xliff > file > body > trans-unit'
+    );
+    transUnitTags?.forEach((element) =>
+      translationUnits.push(...this.evaluateTranslationUnit(element))
+    );
     return translationUnits;
   }
 
-  private evaluateFileNode(node: Node): TranslationUnit[] {
-    const translationUnits: TranslationUnit[] = [];
-    this.fileNode = node;
-    const targetLanguage = (node as Element).getAttribute('target-language');
-    this._targetLanguage = targetLanguage ? targetLanguage : undefined;
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'body') {
-        translationUnits.push(...this.evaluateBodyNode(childNode));
-      }
-    });
-    return translationUnits;
-  }
-
-  private evaluateBodyNode(node: Node): TranslationUnit[] {
-    const translationUnits: TranslationUnit[] = [];
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'trans-unit') {
-        const translationUnit = this.evaluateTransUnitNode(childNode);
-        if (translationUnit) {
-          translationUnits.push(translationUnit);
-        }
-      }
-    });
-    return translationUnits;
-  }
-
-  private evaluateTransUnitNode(node: Node): TranslationUnit | null {
-    if (!node) {
-      return null;
+  private evaluateTranslationUnit(node: Node): TranslationUnit[] {
+    if (node?.nodeName !== 'trans-unit') {
+      return [];
     }
     const id = this.evaluateId(node);
     const source = this.evaluateSource(node);
     if (!id || !source) {
-      return null;
+      return [];
     }
     let target = this.findTarget(node);
     if (!target) {
       target = this.addTarget(node);
     }
-    return {
-      id,
-      source,
-      target: this.evaluateTarget(node),
-      state: this.evaluateTargetState(node),
-      meaning: this.evaluateMeaning(node),
-      description: this.evaluateDescription(node),
-      complexNode: this.isComplexTranslationUnit(node),
-      node,
-    } as TranslationUnit;
+    return [
+      {
+        id,
+        source,
+        target: this.evaluateTarget(node),
+        state: this.evaluateTargetState(node),
+        meaning: this.evaluateMeaning(node),
+        description: this.evaluateDescription(node),
+        complexNode: this.isComplexTranslationUnit(node),
+        node,
+      } as TranslationUnit,
+    ];
+  }
+
+  private getTargetLanguage(xliffDocument?: Document): string {
+    const targetLanguage = (
+      this.findFirstFileNode(xliffDocument) as Element
+    )?.getAttribute('target-language');
+    return targetLanguage ? targetLanguage : '';
+  }
+
+  private findFirstFileNode(
+    xliffDocument: Document | undefined
+  ): Node | undefined {
+    const fileNodes = xliffDocument?.querySelectorAll('file');
+    return fileNodes && fileNodes.length > 0 ? fileNodes.item(0) : undefined;
   }
 
   private evaluateId(node: Node): string | null {
@@ -225,35 +187,27 @@ export class XliffDocument {
   }
 
   private evaluateMeaning(node: Node): string | null {
-    let meaning: string | null = null;
-    node?.childNodes.forEach((childNode) => {
-      if (childNode.nodeName === 'note') {
-        const element = childNode as Element;
-        if (
-          element?.hasAttribute('from') &&
-          element?.getAttribute('from') === 'meaning'
-        ) {
-          meaning = childNode.textContent;
-        }
-      }
-    });
-    return meaning;
+    return this.evaluateNotes(node, 'meaning');
   }
 
   private evaluateDescription(node: Node): string | null {
-    let description: string | null = null;
+    return this.evaluateNotes(node, 'description');
+  }
+
+  private evaluateNotes(node: Node, fromAttribute: string): string | null {
+    let note: string | null = null;
     node?.childNodes.forEach((childNode) => {
       if (childNode.nodeName === 'note') {
         const element = childNode as Element;
         if (
           element?.hasAttribute('from') &&
-          element?.getAttribute('from') === 'description'
+          element?.getAttribute('from') === fromAttribute
         ) {
-          description = childNode.textContent;
+          note = childNode.textContent;
         }
       }
     });
-    return description;
+    return note;
   }
 
   private setTarget(node: Node, target: string): void {
@@ -272,14 +226,17 @@ export class XliffDocument {
   }
 
   private findSource(node: Node): Node | undefined {
-    return this.findChildByNodeName(node, 'source');
+    return this.findFirstChildWithNodeName(node, 'source');
   }
 
   private findTarget(node: Node): Node | undefined {
-    return this.findChildByNodeName(node, 'target');
+    return this.findFirstChildWithNodeName(node, 'target');
   }
 
-  private findChildByNodeName(node: Node, nodeName: string): Node | undefined {
+  private findFirstChildWithNodeName(
+    node: Node,
+    nodeName: string
+  ): Node | undefined {
     let foundNode;
     node?.childNodes.forEach((childNode) => {
       if (childNode.nodeName === nodeName) {
@@ -297,14 +254,17 @@ export class XliffDocument {
     if (!node || !node.hasChildNodes()) {
       return false;
     }
-    if (node.firstChild?.isSameNode(node.lastChild)) {
+    if (
+      node.firstChild?.isSameNode(node.lastChild) &&
+      this.canHandleNode(node.firstChild)
+    ) {
       return false;
     }
     return true;
   }
 
   private addTarget(node: Node): Node {
-    const targetNode = this.document?.createElement('target');
+    const targetNode = this.xliffDocument?.createElement('target');
     this.setStateInNode(targetNode as Node, ValidStates.new);
     node.appendChild(targetNode as Node);
     const sourceNode = this.findSource(node);
@@ -312,5 +272,9 @@ export class XliffDocument {
       (targetNode as Node).appendChild(childNode.cloneNode(true));
     });
     return targetNode as Node;
+  }
+
+  private canHandleNode(node: Node): boolean {
+    return node.nodeType === node.TEXT_NODE || node.nodeName === 'x';
   }
 }

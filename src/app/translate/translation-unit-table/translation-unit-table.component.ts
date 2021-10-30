@@ -30,15 +30,18 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
     this.columnLayout = !value;
   }
 
-  displayedColumns = ['translation'];
+  get displayedColumns(): string[] {
+    return ['translation'];
+  }
 
   reviewMode = false;
 
   form!: FormGroup;
   private formGroups: { [key: string]: FormGroup } = {};
 
+  private _targetLanguage?: string;
   get targetLanguage(): string | undefined {
-    return this.xliffService.currentDocument?.targetLanguage;
+    return this._targetLanguage;
   }
 
   get dubiousLanguage(): boolean {
@@ -58,12 +61,10 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     if (this.xliffService.currentDocument) {
       this.dataSource?.use(this.xliffService.currentDocument);
+      this._targetLanguage = this.xliffService.currentDocument?.targetLanguage;
     }
     this.form = this.formBuilder.group({
-      inputTargetLanguage: new FormControl(
-        this.xliffService.currentDocument?.targetLanguage,
-        []
-      ),
+      inputTargetLanguage: new FormControl(this.targetLanguage, []),
       translationUnits: this.formBuilder.array([]),
     });
     this.form.get('inputTargetLanguage')?.valueChanges.subscribe((event) => {
@@ -95,7 +96,8 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   setTargetLanguage(event: string) {
-    this.xliffService.currentDocument?.setTargetLanguage(event.trim());
+    this._targetLanguage = event.trim();
+    this.xliffService.currentDocument?.setTargetLanguage(this._targetLanguage);
   }
 
   // TODO
@@ -110,10 +112,10 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   formGroup(id: string): FormGroup {
     let formGroup = this.formGroups[id];
     if (!formGroup) {
-      const translationUnit = this.xliffService.translationUnit(id);
+      const translationUnitItem = this.dataSource.findItemById(id);
       const targetFormControl = new FormControl({
-        value: translationUnit?.target,
-        disabled: translationUnit?.complexNode === true,
+        value: translationUnitItem?.target,
+        disabled: translationUnitItem?.complex === true,
       });
       formGroup = this.formBuilder.group({ target: targetFormControl });
       formGroup.valueChanges.subscribe((event) =>
@@ -143,16 +145,16 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   looksGoodToMe(item: TranslationUnitTableItem): void {
-    this.xliffService.currentDocument?.setState(item.id, ValidStates.final);
     this.dataSource.confirmReview(item.id);
+    this.xliffService.currentDocument?.setState(item.id, ValidStates.final);
   }
 
   requestReview(item: TranslationUnitTableItem): void {
+    this.dataSource.requestReview(item.id);
     this.xliffService.currentDocument?.setState(
       item.id,
       ValidStates.needsReviewTranslation
     );
-    this.dataSource.requestReview(item.id);
   }
 
   toggleReviewMode(event: MatSlideToggleChange): void {
@@ -161,7 +163,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   private onValueChange(id: string, event: any): void {
-    this.xliffService.currentDocument?.setTranslation(id, event.target);
     this.dataSource.setTranslation(id, event.target);
+    this.xliffService.currentDocument?.setTranslation(id, event.target);
   }
 }

@@ -22,7 +22,6 @@ describe('ModelToViewConverterService', () => {
       meaning: 'meaning',
       description: 'description',
       state: 'Baden-Württemberg',
-      node: undefined,
     } as TranslationUnit;
     const item = service.convert(translationUnit);
     expect(item.id).toEqual('id');

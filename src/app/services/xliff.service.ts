@@ -1,26 +1,23 @@
 import { Injectable } from '@angular/core';
-import { TranslationUnit, XliffDocument } from './../model/xliff-document';
+import { XliffDocument } from './../model/xliff-document';
 
 @Injectable({
   providedIn: 'root',
 })
 export class XliffService {
-  currentDocument?: XliffDocument;
+  get currentDocument(): XliffDocument | undefined {
+    return this._currentDocument;
+  }
+  private _currentDocument?: XliffDocument;
 
   constructor() {}
 
   use(xliffDocument: XliffDocument): void {
-    this.currentDocument = xliffDocument;
+    this._currentDocument = xliffDocument;
   }
 
   clear(): void {
-    this.currentDocument = undefined;
-  }
-
-  translationUnit(id: string): TranslationUnit | undefined {
-    return this.currentDocument?.translationUnits?.find(
-      (translationUnit) => translationUnit.id === id
-    );
+    this._currentDocument = undefined;
   }
 
   isUsualLocaleFormat(locale: string): boolean {
