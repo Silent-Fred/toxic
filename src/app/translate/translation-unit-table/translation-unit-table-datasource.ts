@@ -11,13 +11,16 @@ import {
 
 export interface TranslationUnitTableItem {
   id: string;
+  translationUnitId: string;
+  fragmentIndex: number;
   source: string;
   target?: string;
   meaning?: string;
   description?: string;
   state?: string;
   flaggedForReview?: boolean;
-  complex?: boolean;
+  fragmented?: boolean;
+  unsupported?: boolean;
 }
 
 /**
@@ -58,14 +61,14 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<TranslationUnitTableItem[]> {
-    if (this.paginator && this.sort) {
+    if (this.paginator /* && this.sort */) {
       // Combine everything that affects the rendered data into one update
       // stream for the data-table to consume.
       return merge(
         this.filtered$,
         this.reviewMode$,
-        this.paginator.page,
-        this.sort.sortChange
+        this.paginator.page
+        // this.sort.sortChange
       ).pipe(
         map(() => {
           return this.getPagedData(this.getSortedData([...this.filtered]));
@@ -90,10 +93,11 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   }
 
   use(xliffDocument: XliffDocument | undefined): void {
-    this.data =
-      xliffDocument?.translationUnits?.map((translationUnit) =>
-        this.convertModelToTableItem(translationUnit)
-      ) ?? [];
+    const newData: TranslationUnitTableItem[] = [];
+    xliffDocument?.translationUnits?.forEach((translationUnit) =>
+      newData.push(...this.convertModelToTableItem(translationUnit))
+    );
+    this.data = [...newData];
     // Reset filtering when a new document is opened. We might also
     // consider to keep a filter "alive" we'd just have to recalculate
     // the filtered content in that case.
@@ -101,22 +105,21 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   }
 
   setTranslation(id: string, translation: string): void {
-    const item = this.data.find((item) => item.id === id);
+    const item = this.findItemById(id);
     if (item) {
       item.target = translation;
-      // The app supports only a simple workflow where 'translated'
-      // also means 'final'. Reviews have to be requested explicitly.
-      item.state = ValidStates.final;
-      item.flaggedForReview = !this.reviewed(item);
     }
+    // The app supports only a simple workflow where 'translated'
+    // also means 'final'. Reviews have to be requested explicitly.
+    this.setStateConsideringSiblings(id, ValidStates.final);
   }
 
   requestReview(id: string): void {
-    this.setState(id, ValidStates.needsReviewTranslation);
+    this.setStateConsideringSiblings(id, ValidStates.needsReviewTranslation);
   }
 
   confirmReview(id: string): void {
-    this.setState(id, ValidStates.final);
+    this.setStateConsideringSiblings(id, ValidStates.final);
   }
 
   findItemById(id: string): TranslationUnitTableItem | undefined {
@@ -145,19 +148,25 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   private getSortedData(
     data: TranslationUnitTableItem[]
   ): TranslationUnitTableItem[] {
-    if (
-      (!this.sort || !this.sort.active || this.sort.direction === '') &&
-      !this.reviewMode$.value
-    ) {
-      return data;
-    }
-
-    return data.sort((a, b) => {
-      const isAsc = this.sort?.direction === 'asc';
-      if (a.flaggedForReview === b.flaggedForReview) {
-        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+    const sortedData = [...data];
+    // Currently we use a default sort order
+    return sortedData.sort((a, b) => {
+      let sortByReview = 0;
+      if (this.reviewMode$.value) {
+        sortByReview =
+          a.flaggedForReview === b.flaggedForReview
+            ? 0
+            : a.flaggedForReview
+            ? -1
+            : 1;
       }
-      return a.flaggedForReview ? -1 : 1;
+      if (sortByReview !== 0) {
+        return sortByReview;
+      }
+      if (a.id === b.id) {
+        return a.fragmentIndex < b.fragmentIndex ? -1 : 1;
+      }
+      return a.id < b.id ? -1 : 1;
     });
   }
 
@@ -179,22 +188,62 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
   private convertModelToTableItem(
     translationUnit: TranslationUnit
-  ): TranslationUnitTableItem {
-    const item: TranslationUnitTableItem = Object.assign({}, translationUnit);
-    item.flaggedForReview = !this.reviewed(item);
-    item.complex = translationUnit.complexNode === true;
-    return item;
+  ): TranslationUnitTableItem[] {
+    const items: TranslationUnitTableItem[] =
+      this.initialiseItemFromModel(translationUnit);
+    items.forEach((item) => (item.flaggedForReview = !this.reviewed(item)));
+    return items;
+  }
+
+  private initialiseItemFromModel(
+    translationUnit: TranslationUnit
+  ): TranslationUnitTableItem[] {
+    const items: TranslationUnitTableItem[] = [];
+    const numberOfFragments = Math.max(
+      translationUnit.sourceFragments.length,
+      translationUnit.targetFragments?.length
+    );
+    for (
+      let fragmentIndex = 0;
+      fragmentIndex < numberOfFragments;
+      fragmentIndex++
+    ) {
+      const item = {
+        id: translationUnit.id + '#' + fragmentIndex,
+        translationUnitId: translationUnit.id,
+        fragmentIndex,
+        meaning: translationUnit.meaning,
+        description: translationUnit.description,
+        state: translationUnit.state,
+        fragmented: numberOfFragments > 1,
+        unsupported: translationUnit.unsupported,
+      } as TranslationUnitTableItem;
+      items.push(item);
+    }
+    translationUnit.sourceFragments.forEach(
+      (fragment, index) => (items[index].source = fragment)
+    );
+    translationUnit.targetFragments.forEach(
+      (fragment, index) => (items[index].target = fragment)
+    );
+    return items;
   }
 
   private reviewed(item: TranslationUnitTableItem): boolean {
     return this.reviewedStates.includes(item.state || '');
   }
 
-  private setState(id: string, state: string): void {
-    const item = this.data.find((item) => item.id === id);
+  private setStateConsideringSiblings(id: string, state: string): void {
+    const item = this.findItemById(id);
     if (item) {
-      item.state = state;
-      item.flaggedForReview = !this.reviewed(item);
+      this.data
+        .filter(
+          (sibling) => sibling.translationUnitId === item.translationUnitId
+        )
+        .forEach((sibling) => {
+          sibling.state = state;
+          sibling.flaggedForReview = !this.reviewed(item);
+        });
     }
   }
 }

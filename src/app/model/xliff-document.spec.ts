@@ -58,7 +58,7 @@ describe('XliffDocument', () => {
     const document = new XliffDocument();
     document.parseXliff(xliff);
     document.setTargetLanguage('fr');
-    document.setTranslation('some.silly.id', 'this is new');
+    document.setTranslation('some.silly.id', 0, 'this is new');
     const text = await document.asBlob().text();
     const nextDocument = new XliffDocument(text);
     expect(nextDocument.targetLanguage).toEqual('fr');

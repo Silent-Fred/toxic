@@ -27,17 +27,20 @@
 
   <ng-container formArrayName="translationUnits">
     <div class="mat-elevation-z8">
-      <table mat-table class="full-width-table" matSort aria-label="Elements">
+      <table mat-table class="full-width-table" aria-label="Elements">
         <!-- Translation Column -->
         <ng-container matColumnDef="translation">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Translation</th>
+          <th mat-header-cell *matHeaderCellDef>Translation</th>
           <td mat-cell *matCellDef="let item" [formGroup]="formGroup(item.id)">
             <div class="translationUnitTableCell">
               <div class="idAndReviewActions">
                 <div>
-                  <mat-icon *ngIf="item.complex === true" svgIcon="hand-left"
-                    matTooltip="This translation item is a complex thing, not just text. Maybe with pluralisation or other fancy stuff. This is not yet supported for editing.">
-                  </mat-icon><span class="label id">ID</span><span class="id">{{ item.id }}</span>
+                  <mat-icon *ngIf="item.unsupported === true" svgIcon="hand-left"
+                    matTooltip="Phew! This translation item is too complex for me. Maybe in a future version...">
+                  </mat-icon>
+                  <mat-icon *ngIf="item.fragmented === true && item.unsupported !== true" svgIcon="puzzle"
+                    matTooltip="This translation consists of several parts">
+                  </mat-icon><span class="label id">ID</span><span class="id">{{ item.translationUnitId }}</span>
                 </div>
                 <div class="reviewActions">
                   <button *ngIf="item.flaggedForReview" mat-stroked-button color="accent"

@@ -14,11 +14,13 @@ export const ValidStates = {
 export interface TranslationUnit {
   id: string;
   source: string;
-  target?: string;
+  sourceFragments: string[];
+  target: string;
+  targetFragments: string[];
   meaning?: string;
   description?: string;
   state?: string;
-  complexNode: boolean;
+  unsupported: boolean;
 }
 
 export class XliffDocument {
@@ -65,11 +67,10 @@ export class XliffDocument {
     }
   }
 
-  setTranslation(id: string, translation: string): void {
+  setTranslation(id: string, fragmentIndex: number, translation: string): void {
     const node = this.xliffDocument?.getElementById(id);
-    // TODO so far only for simple nodes without e.g. plurals
-    if (node && !this.isComplexTranslationUnit(node)) {
-      this.setTarget(node, translation);
+    if (node) {
+      this.setTargetFragment(node, fragmentIndex, translation);
     }
     this._unsavedChanges = true;
   }
@@ -125,26 +126,56 @@ export class XliffDocument {
       return [];
     }
     const id = this.evaluateId(node);
-    const source = this.evaluateSource(node);
+    const sourceFragments = this.fragments(this.findSource(node));
+    const source = sourceFragments.join();
     if (!id || !source) {
       return [];
     }
-    let target = this.findTarget(node);
-    if (!target) {
-      target = this.addTarget(node);
+    let targetFragments = this.fragments(this.findTarget(node));
+    if (targetFragments.length === 0) {
+      this.addTarget(node);
+      targetFragments = this.fragments(this.findTarget(node));
     }
+    const target = targetFragments.join();
+    const unsupported =
+      this.containsUnsupportedContent(this.findSource(node)) ||
+      this.containsUnsupportedContent(this.findTarget(node));
     return [
       {
         id,
         source,
-        target: this.evaluateTarget(node),
+        sourceFragments,
+        target,
+        targetFragments,
         state: this.evaluateTargetState(node),
         meaning: this.evaluateMeaning(node),
         description: this.evaluateDescription(node),
         complexNode: this.isComplexTranslationUnit(node),
-        node,
+        unsupported,
       } as TranslationUnit,
     ];
+  }
+
+  private fragments(node: Node | undefined): string[] {
+    const fragments: string[] = [];
+    node?.childNodes.forEach((childNode) => {
+      if (childNode.TEXT_NODE === childNode.nodeType) {
+        fragments.push(childNode.textContent ?? '');
+      } else if (childNode.nodeName === 'x') {
+        fragments.push((childNode as Element).getAttribute('equiv-text') ?? '');
+      }
+    });
+    return fragments;
+  }
+
+  private containsUnsupportedContent(node?: Node): boolean {
+    let unsupportedContent = false;
+    node?.childNodes.forEach((childNode) => {
+      unsupportedContent ||=
+        childNode.TEXT_NODE !== childNode.nodeType &&
+        childNode.nodeName !== 'x';
+    });
+    return unsupportedContent;
   }
 
   private getTargetLanguage(xliffDocument?: Document): string {
@@ -164,16 +195,6 @@ export class XliffDocument {
   private evaluateId(node: Node): string | null {
     const element = node as Element;
     return element?.hasAttribute('id') ? element.getAttribute('id') : null;
-  }
-
-  private evaluateSource(node: Node): string | null {
-    const textContent = this.findSource(node)?.textContent;
-    return textContent ? textContent : null;
-  }
-
-  private evaluateTarget(node: Node): string | null {
-    const textContent = this.findTarget(node)?.textContent;
-    return textContent ? textContent : null;
   }
 
   private evaluateTargetState(node: Node): string | null {
@@ -210,14 +231,21 @@ export class XliffDocument {
     return note;
   }
 
-  private setTarget(node: Node, target: string): void {
-    // TODO this only works for simple nodes, not for complex
-    // targets like e.g. with a pluralisation
+  private setTargetFragment(
+    node: Node,
+    fragmentIndex: number,
+    target: string
+  ): void {
     let targetNode = this.findTarget(node);
     if (!targetNode) {
       targetNode = this.addTarget(node);
     }
-    targetNode.textContent = target;
+    const fragment = targetNode.childNodes.item(fragmentIndex);
+    if (fragment?.nodeType === targetNode.TEXT_NODE) {
+      fragment.textContent = target;
+    } else if (fragment?.nodeName === 'x') {
+      (fragment as Element).setAttribute('equiv-text', target);
+    }
   }
 
   private setStateInNode(node: Node, state: string): void {

@@ -115,7 +115,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
       const translationUnitItem = this.dataSource.findItemById(id);
       const targetFormControl = new FormControl({
         value: translationUnitItem?.target,
-        disabled: translationUnitItem?.complex === true,
+        disabled: translationUnitItem?.unsupported === true,
       });
       formGroup = this.formBuilder.group({ target: targetFormControl });
       formGroup.valueChanges.subscribe((event) =>
@@ -163,7 +163,14 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   private onValueChange(id: string, event: any): void {
-    this.dataSource.setTranslation(id, event.target);
-    this.xliffService.currentDocument?.setTranslation(id, event.target);
+    const item = this.dataSource.findItemById(id);
+    if (item) {
+      this.dataSource.setTranslation(id, event.target);
+      this.xliffService.currentDocument?.setTranslation(
+        item?.translationUnitId,
+        item?.fragmentIndex,
+        event.target
+      );
+    }
   }
 }
