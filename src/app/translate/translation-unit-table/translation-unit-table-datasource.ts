@@ -8,20 +8,11 @@ import {
   ValidStates,
   XliffDocument,
 } from './../../model/xliff-document';
-
-export interface TranslationUnitTableItem {
-  id: string;
-  translationUnitId: string;
-  fragmentIndex: number;
-  source: string;
-  target?: string;
-  meaning?: string;
-  description?: string;
-  state?: string;
-  flaggedForReview?: boolean;
-  fragmented?: boolean;
-  unsupported?: boolean;
-}
+import {
+  sortByTranslationUnitId,
+  sortReviewMode,
+  TranslationUnitTableItem,
+} from './translation-unit-table-item';
 
 /**
  * Data source for the TranslationUnitTable view. This class should
@@ -151,22 +142,10 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     const sortedData = [...data];
     // Currently we use a default sort order
     return sortedData.sort((a, b) => {
-      let sortByReview = 0;
       if (this.reviewMode$.value) {
-        sortByReview =
-          a.flaggedForReview === b.flaggedForReview
-            ? 0
-            : a.flaggedForReview
-            ? -1
-            : 1;
+        return sortReviewMode(a, b);
       }
-      if (sortByReview !== 0) {
-        return sortByReview;
-      }
-      if (a.id === b.id) {
-        return a.fragmentIndex < b.fragmentIndex ? -1 : 1;
-      }
-      return a.id < b.id ? -1 : 1;
+      return sortByTranslationUnitId(a, b);
     });
   }
 

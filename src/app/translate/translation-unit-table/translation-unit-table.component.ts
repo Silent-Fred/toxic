@@ -6,10 +6,8 @@ import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { ValidStates } from './../../model/xliff-document';
 import { XliffService } from './../../services/xliff.service';
-import {
-  TranslationUnitTableDataSource,
-  TranslationUnitTableItem,
-} from './translation-unit-table-datasource';
+import { TranslationUnitTableDataSource } from './translation-unit-table-datasource';
+import { TranslationUnitTableItem } from './translation-unit-table-item';
 
 @Component({
   selector: 'toxic-translation-unit-table',
