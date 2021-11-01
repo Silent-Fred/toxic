@@ -127,7 +127,7 @@ export class XliffDocument {
     }
     const id = this.evaluateId(node);
     const sourceFragments = this.fragments(this.findSource(node));
-    const source = sourceFragments.join();
+    const source = sourceFragments.join('');
     if (!id || !source) {
       return [];
     }
@@ -136,7 +136,7 @@ export class XliffDocument {
       this.addTarget(node);
       targetFragments = this.fragments(this.findTarget(node));
     }
-    const target = targetFragments.join();
+    const target = targetFragments.join('');
     const unsupported =
       this.containsUnsupportedContent(this.findSource(node)) ||
       this.containsUnsupportedContent(this.findTarget(node));
