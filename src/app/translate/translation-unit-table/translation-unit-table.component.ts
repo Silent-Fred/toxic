@@ -144,13 +144,16 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
 
   looksGoodToMe(item: TranslationUnitTableItem): void {
     this.dataSource.confirmReview(item.id);
-    this.xliffService.currentDocument?.setState(item.id, ValidStates.final);
+    this.xliffService.currentDocument?.setState(
+      item.translationUnitId,
+      ValidStates.final
+    );
   }
 
   requestReview(item: TranslationUnitTableItem): void {
     this.dataSource.requestReview(item.id);
     this.xliffService.currentDocument?.setState(
-      item.id,
+      item.translationUnitId,
       ValidStates.needsReviewTranslation
     );
   }
