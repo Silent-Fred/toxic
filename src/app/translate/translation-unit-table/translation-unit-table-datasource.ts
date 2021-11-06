@@ -3,11 +3,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {
-  TranslationUnit,
-  ValidStates,
-  XliffDocument,
-} from './../../model/xliff-document';
+import { ValidStates } from 'src/app/model/xliff-version-abstraction';
+import { TranslationUnit } from './../../model/translation-unit';
+import { XliffDocument } from './../../model/xliff-document';
 import {
   sortByTranslationUnitId,
   sortReviewMode,
@@ -25,8 +23,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
   private readonly reviewedStates: string[] = [
     ValidStates.final,
-    ValidStates.signedOff,
-    ValidStates.translated,
+    ValidStates.reviewed,
   ];
 
   private data: TranslationUnitTableItem[] = [];
@@ -106,7 +103,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   }
 
   requestReview(id: string): void {
-    this.setStateConsideringSiblings(id, ValidStates.needsReviewTranslation);
+    this.setStateConsideringSiblings(id, ValidStates.translated);
   }
 
   confirmReview(id: string): void {
@@ -177,33 +174,19 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
   private initialiseItemFromModel(
     translationUnit: TranslationUnit
   ): TranslationUnitTableItem[] {
-    const items: TranslationUnitTableItem[] = [];
-    const numberOfFragments = Math.max(
-      translationUnit.sourceFragments.length,
-      translationUnit.targetFragments?.length
-    );
-    for (
-      let fragmentIndex = 0;
-      fragmentIndex < numberOfFragments;
-      fragmentIndex++
-    ) {
-      const item = {
-        id: translationUnit.id + '#' + fragmentIndex,
+    const items: TranslationUnitTableItem[] = translationUnit.fragments.map(
+      (fragment, index) => ({
+        id: translationUnit.id + '#' + index,
         translationUnitId: translationUnit.id,
-        fragmentIndex,
+        fragmentIndex: index,
+        state: fragment.state,
+        source: fragment.source,
+        target: fragment.target,
         meaning: translationUnit.meaning,
         description: translationUnit.description,
-        state: translationUnit.state,
-        fragmented: numberOfFragments > 1,
+        fragmented: translationUnit.fragments.length > 1,
         unsupported: translationUnit.unsupported,
-      } as TranslationUnitTableItem;
-      items.push(item);
-    }
-    translationUnit.sourceFragments.forEach(
-      (fragment, index) => (items[index].source = fragment)
-    );
-    translationUnit.targetFragments.forEach(
-      (fragment, index) => (items[index].target = fragment)
+      })
     );
     return items;
   }

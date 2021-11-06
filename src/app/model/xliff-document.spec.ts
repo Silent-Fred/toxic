@@ -1,6 +1,6 @@
 import { XliffDocument } from './xliff-document';
 
-const xliff = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+const xliff12 = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="de-AT">
     <body>
       <trans-unit id="some.silly.id" datatype="html">
@@ -17,37 +17,20 @@ const xliff = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:nam
   </file>
 </xliff>`;
 
-const xliffComplex = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="de-AT">
-    <body>
-      <trans-unit id="some.silly.id" datatype="html">
-        <source>The source of truth <x id="subThingyId" equiv-text="is complex" /></source>
-        <target state="new">Targeted ads <x id="subThingyId" equiv-text="are annoying" /></target>
-        <note priority="1" from="description">A description</note>
-        <note priority="1" from="meaning">Is your life meaningful?</note>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/there/we/go.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-      </trans-unit>
-    </body>
-  </file>
-</xliff>`;
-
-const xliffUnsupported = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="de-AT">
-    <body>
-      <trans-unit id="some.silly.id" datatype="html">
-        <source>The source of truth <xg id="unsupportedThingy" equiv-text="is complex" /></source>
-        <target state="new">Targeted ads <x id="subThingyId" equiv-text="are annoying" /></target>
-        <note priority="1" from="description">A description</note>
-        <note priority="1" from="meaning">Is your life meaningful?</note>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/there/we/go.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-      </trans-unit>
-    </body>
+const xliff20 = `<?xml version="1.0" encoding="UTF-8"?>
+  <xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US" trgLang="de-AT">
+  <file id="ngi18n" original="ng.template">
+    <unit id="some.silly.id">
+      <notes>
+        <note category="location">src/app/there/we/go.component.html:42</note>
+        <note category="description">A description</note>
+        <note category="meaning">Is your life meaningful?</note>
+      </notes>
+      <segment state="initial">
+        <source>The source of truth</source>
+        <target>Targeted ads</target>
+      </segment>
+    </unit>
   </file>
 </xliff>`;
 
@@ -58,67 +41,64 @@ describe('XliffDocument', () => {
     expect(new XliffDocument()).toBeTruthy();
   });
 
-  it('should parse a document', () => {
-    const document = new XliffDocument();
-    document.parseXliff(xliff);
-    expect(document.translationUnits.length).toEqual(1);
+  it('should be able to select the correct version handling', () => {
+    const document12 = new XliffDocument();
+    document12.parseXliff(xliff12);
+    const document20 = new XliffDocument();
+    document20.parseXliff(xliff20);
+    expect(document12.valid).toBeTrue();
+    expect(document20.valid).toBeTrue();
+    expect(document12.translationUnits.length).toEqual(
+      document20.translationUnits.length
+    );
+    expect(document12.translationUnits[0].source).toEqual(
+      document12.translationUnits[0].source
+    );
+    expect(document12.translationUnits[0].target).toEqual(
+      document12.translationUnits[0].target
+    );
   });
 
   it('should NOT parse e.g. an SVG', () => {
     const document = new XliffDocument();
     document.parseXliff(svg);
     expect(document.translationUnits.length).toEqual(0);
+    expect(document.valid).toBeFalse();
   });
 
-  it('should parse the translation unit correctly', () => {
+  it('should correctly track unsaved changes', () => {
     const document = new XliffDocument();
-    document.parseXliff(xliff);
-    const translationUnit = document.translationUnits[0];
-    expect(translationUnit.id).toEqual('some.silly.id');
-    expect(translationUnit.source).toEqual('The source of truth');
-    expect(translationUnit.target).toEqual('Targeted ads');
-    expect(translationUnit.state).toEqual('new');
-    expect(translationUnit.meaning).toEqual('Is your life meaningful?');
-    expect(translationUnit.description).toEqual('A description');
-  });
-
-  it('should parse the target language correctly', () => {
-    const document = new XliffDocument();
-    document.parseXliff(xliff);
-    expect(document.targetLanguage).toEqual('de-AT');
-  });
-
-  it('should set targets and the target language', async () => {
-    const document = new XliffDocument();
-    document.parseXliff(xliff);
+    document.parseXliff(xliff12);
+    expect(document.unsavedChanges).toBeFalse();
     document.setTargetLanguage('fr');
-    document.setTranslation('some.silly.id', 0, 'this is new');
-    const text = await document.asBlob().text();
-    const nextDocument = new XliffDocument(text);
-    expect(nextDocument.targetLanguage).toEqual('fr');
-    const translationUnit = nextDocument.translationUnits[0];
-    expect(translationUnit.target).toEqual('this is new');
+    expect(document.unsavedChanges).toBeTrue();
+    document.acceptUnsavedChanges();
+    expect(document.unsavedChanges).toBeFalse();
+    document.setTranslation(
+      'some.silly.id',
+      0,
+      'and now for something completely different'
+    );
+    expect(document.unsavedChanges).toBeTrue();
+    document.acceptUnsavedChanges();
+    expect(document.unsavedChanges).toBeFalse();
+    document.setState('some.silly.id', 'final');
+    expect(document.unsavedChanges).toBeTrue();
   });
 
-  it('should handle x elements', () => {
+  it('should not spectacularly fail if others are stupid', () => {
     const document = new XliffDocument();
-    document.parseXliff(xliffComplex);
-    const translationUnit = document.translationUnits[0];
-    expect(translationUnit.id).toEqual('some.silly.id');
-    expect(translationUnit.source).toEqual('The source of truth is complex');
-    expect(translationUnit.target).toEqual('Targeted ads are annoying');
-    expect(translationUnit.sourceFragments.length).toEqual(2);
-    expect(translationUnit.targetFragments.length).toEqual(2);
-    expect(translationUnit.unsupported).toBeFalse();
-  });
-
-  it('should gracefully handle unsupported elements', () => {
-    const document = new XliffDocument();
-    document.parseXliff(xliffUnsupported);
-    const translationUnit = document.translationUnits[0];
-    expect(translationUnit.id).toEqual('some.silly.id');
-    expect(translationUnit.source).toEqual('The source of truth ');
-    expect(translationUnit.sourceFragments.length).toEqual(1);
-    expect(translationUnit.unsupported).toBeTrue();
+    document.parseXliff(svg);
+    expect(document.valid).toBeFalse();
+    document.setTargetLanguage('fr');
+    document.setTranslation(
+      'some.silly.id',
+      0,
+      'and now for something completely different'
+    );
+    // currently marked as containing unsaved changes even though
+    // it doesn't contain anything - just make sure a setSomething
+    // won't crash
+    expect(document.unsavedChanges).toBeTrue();
   });
 });

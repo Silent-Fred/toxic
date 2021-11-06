@@ -1,12 +1,22 @@
 # TOXIC Editor
 
-The open XLIFF internationalisation content editor.
+The Open XLIFF Internationalisation Content Editor.
 
 ## For whom is this project?
 
 It is for those unfortunate people who are looking for a tool to work with XLIFF files but are neither
 allowed to install one of the available programs on their (company-) computer and also may not
 have access to paid online services.
+
+### Supported formats
+
+XLIFF 1.2 and 2.0
+
+### Limitations
+
+Not the full set of possibilities of the two formats is supported. The narrow focus is
+to just make it through the day with what you usually need for translation files that
+are part of an Angular application that uses the standard internationalisation.
 
 ## How does it work?
 

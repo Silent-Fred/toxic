@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
-import { ValidStates } from './../../model/xliff-document';
+import { ValidStates } from 'src/app/model/xliff-version-abstraction';
 import { XliffService } from './../../services/xliff.service';
 import { TranslationUnitTableDataSource } from './translation-unit-table-datasource';
 import { TranslationUnitTableItem } from './translation-unit-table-item';
@@ -154,7 +154,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
     this.dataSource.requestReview(item.id);
     this.xliffService.currentDocument?.setState(
       item.translationUnitId,
-      ValidStates.needsReviewTranslation
+      ValidStates.translated
     );
   }
 
