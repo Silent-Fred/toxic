@@ -7,12 +7,9 @@ export interface TranslationUnitFragment {
 export interface TranslationUnit {
   id: string;
   source: string;
-  // sourceFragments: string[];
   target: string;
-  // targetFragments: string[];
   fragments: TranslationUnitFragment[];
   meaning?: string;
   description?: string;
-  // state?: string;
   unsupported: boolean;
 }

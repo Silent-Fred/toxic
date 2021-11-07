@@ -7,6 +7,7 @@ import { XliffDocument } from '../../model/xliff-document';
   styleUrls: ['./xliff-upload.component.scss'],
 })
 export class XliffUploadComponent {
+  @Input() label?: string;
   @Input() eyecatch: boolean = true;
   @Output() xliffDocumentUploaded = new EventEmitter<XliffDocument>();
 

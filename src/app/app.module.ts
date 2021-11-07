@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeModule } from './home/home.module';
 import { SidebarModule } from './sidebar/sidebar.module';
+import { SyncModule } from './sync/sync.module';
 import { TranslateModule } from './translate/translate.module';
 import { TutorialModule } from './tutorial/tutorial.module';
 import { XliffModule } from './xliff/xliff.module';
@@ -18,6 +19,7 @@ import { XliffModule } from './xliff/xliff.module';
     TranslateModule,
     HomeModule,
     XliffModule,
+    SyncModule,
     TutorialModule,
     AppRoutingModule,
   ],

@@ -1,0 +1,5 @@
+<toxic-xliff-upload (xliffDocumentUploaded)="onUploadLatest($event)" [eyecatch]="!latestIsDefined"
+  [label]="latestFilename ?? 'Drop the file with the latest, most up to date content here.'"></toxic-xliff-upload>
+<toxic-xliff-upload (xliffDocumentUploaded)="onUploadAlign($event)" [eyecatch]="!alignIsDefined"
+  [label]="alignFilename ?? 'Drop the file you want to bring up to date here.'">
+</toxic-xliff-upload>
