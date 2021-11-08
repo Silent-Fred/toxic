@@ -59,7 +59,7 @@ export class SyncComponent implements OnInit {
       this.latest.translationUnits.forEach((translationUnit) => {
         let state: string = ValidStates.final;
         const existingTranslationUnit = existingTranslationUnits.find(
-          (translationUnit) => translationUnit.id === translationUnit.id
+          (existingCandidate) => existingCandidate.id === translationUnit.id
         );
         if (!existingTranslationUnit) {
           state = ValidStates.initial;

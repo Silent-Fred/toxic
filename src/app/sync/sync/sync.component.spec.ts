@@ -100,6 +100,11 @@ describe('SyncComponent', () => {
         (translationUnit) => translationUnit.id === 'some.sillier.id'
       )?.fragments[0].state
     ).toEqual('new');
+    expect(
+      latest.translationUnits.find(
+        (translationUnit) => translationUnit.id === 'some.sillier.id'
+      )?.fragments[0].target
+    ).toEqual('And more than one translation');
   });
 
   it('should navigate to translate after successful uploads', () => {
