@@ -35,12 +35,18 @@
             <div class="translationUnitTableCell">
               <div class="idAndReviewActions">
                 <div>
-                  <mat-icon *ngIf="item.unsupported === true" svgIcon="hand-left"
-                    matTooltip="Phew! This translation item is too complex for me. Maybe in a future version...">
-                  </mat-icon>
-                  <mat-icon *ngIf="item.fragmented === true && item.unsupported !== true" svgIcon="puzzle"
-                    matTooltip="This translation consists of several parts">
-                  </mat-icon><span class="label id">ID</span><span class="id">{{ item.translationUnitId }}</span>
+                  <ng-container *ngIf="item.unsupported === true">
+                    <mat-icon *ngIf="item.unsupported === true" svgIcon="hand-left"
+                      matTooltip="Phew! This translation item is too complex for me. Maybe in a future version...">
+                    </mat-icon>
+                  </ng-container>
+                  <ng-container *ngIf="item.fragmented === true && item.unsupported !== true">
+                    <mat-icon
+                      [svgIcon]="item.fragmentPosition === 'first' ? 'puzzle-top-left' : (item.fragmentPosition === 'last' ? 'puzzle-bottom-left' : 'puzzle-left')"
+                      matTooltip="This translation consists of several parts">
+                    </mat-icon>
+                  </ng-container>
+                  <span class="label id">ID</span><span class="id">{{ item.translationUnitId }}</span>
                 </div>
                 <div class="reviewActions">
                   <button *ngIf="item.flaggedForReview" mat-stroked-button color="accent"

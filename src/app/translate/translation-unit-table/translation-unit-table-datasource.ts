@@ -7,6 +7,7 @@ import { ValidStates } from 'src/app/model/xliff-version-abstraction';
 import { TranslationUnit } from './../../model/translation-unit';
 import { XliffDocument } from './../../model/xliff-document';
 import {
+  FragmentPosition,
   sortByTranslationUnitId,
   sortReviewMode,
   TranslationUnitTableItem,
@@ -185,6 +186,14 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
         meaning: translationUnit.meaning,
         description: translationUnit.description,
         fragmented: translationUnit.fragments.length > 1,
+        fragmentPosition:
+          translationUnit.fragments.length <= 1
+            ? undefined
+            : index === 0
+            ? FragmentPosition.first
+            : index === translationUnit.fragments.length - 1
+            ? FragmentPosition.last
+            : FragmentPosition.middle,
         unsupported: translationUnit.unsupported,
       })
     );

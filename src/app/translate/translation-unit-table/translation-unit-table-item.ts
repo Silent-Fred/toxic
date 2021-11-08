@@ -1,3 +1,9 @@
+export const FragmentPosition = {
+  first: 'first',
+  middle: 'middle',
+  last: 'last',
+} as const;
+
 export interface TranslationUnitTableItem {
   id: string;
   translationUnitId: string;
@@ -9,6 +15,7 @@ export interface TranslationUnitTableItem {
   state?: string;
   flaggedForReview?: boolean;
   fragmented?: boolean;
+  fragmentPosition?: string;
   unsupported?: boolean;
 }
 
