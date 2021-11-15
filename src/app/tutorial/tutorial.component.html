@@ -1,5 +1,6 @@
 <div class="tutorial">
   <h2>A Quick Tutorial</h2>
+  <h3>The <em>Open</em> menu item</h3>
   <p>The <em>Open</em> menu item takes you to the dialog where you can open
     your translation file by dragging and dropping it onto the marked screen
     area.
@@ -10,7 +11,17 @@
   </p>
   <p>
     <button mat-button type="button" color="primary" aria-label="Show me how it works..." (click)="showMeHow()">Show me
-      how
-      it works...</button>
+      how it works...</button>
+  </p>
+  <h3>The <em>Synchronise</em> menu item</h3>
+  <p>If you happen to have a newly created or updated file with all the current
+    content and an old, not up to date translation file, this dialogue might be
+    helpful.
+  </p>
+  <p>Drop the files on the corresponding areas and the application will
+    merge the contents. New additions and existing translations where the source
+    text has changed in the reference document will be marked for review, others
+    will be accepted as okay. You will be redirected to the translation dialogue
+    where you can review the translations and download the result.
   </p>
 </div>
