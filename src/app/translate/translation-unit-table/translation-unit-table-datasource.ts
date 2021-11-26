@@ -74,7 +74,9 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
    *  Called when the table is being destroyed. Use this function, to clean up
    * any open connections or free any held resources that were set up during connect.
    */
-  disconnect(): void {}
+  disconnect(): void {
+    // currently nothing fancy... in fact, nothing at all planned here
+  }
 
   filter(value: string): void {
     this.filtered$.next(this.data.filter((item) => this.match(item, value)));
@@ -186,14 +188,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
         meaning: translationUnit.meaning,
         description: translationUnit.description,
         fragmented: translationUnit.fragments.length > 1,
-        fragmentPosition:
-          translationUnit.fragments.length <= 1
-            ? undefined
-            : index === 0
-            ? FragmentPosition.first
-            : index === translationUnit.fragments.length - 1
-            ? FragmentPosition.last
-            : FragmentPosition.middle,
+        fragmentPosition: this.fragmentPosition(translationUnit, index),
         unsupported: translationUnit.unsupported,
       })
     );
@@ -216,5 +211,20 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
           sibling.flaggedForReview = !this.reviewed(item);
         });
     }
+  }
+
+  private fragmentPosition(
+    translationUnit: TranslationUnit,
+    index: number
+  ): string | undefined {
+    if (translationUnit.fragments.length <= 1) {
+      return undefined;
+    }
+    if (index === 0) {
+      return FragmentPosition.first;
+    }
+    return index === translationUnit.fragments.length - 1
+      ? FragmentPosition.last
+      : FragmentPosition.middle;
   }
 }

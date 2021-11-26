@@ -13,8 +13,6 @@ export class DropZoneDirective {
   @Output() fileDropped = new EventEmitter<FileList>();
   @HostBinding('class.toxicDropZoneActive') toxicDropZoneActive = false;
 
-  constructor() {}
-
   @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent): void {
     this.commonEventHandlingStuff(event);

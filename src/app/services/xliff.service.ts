@@ -10,8 +10,6 @@ export class XliffService {
   }
   private _currentDocument?: XliffDocument;
 
-  constructor() {}
-
   use(xliffDocument: XliffDocument): void {
     this._currentDocument = xliffDocument;
   }
@@ -21,6 +19,6 @@ export class XliffService {
   }
 
   isUsualLocaleFormat(locale: string): boolean {
-    return locale.match(/^[a-z]{2}([_-][A-Z]{2}){0,1}$/) !== null;
+    return locale.match(/^[a-z]{2}([_-][A-Z]{2})?$/) !== null;
   }
 }

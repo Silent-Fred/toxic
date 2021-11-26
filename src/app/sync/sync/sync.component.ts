@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslationUnit } from './../../model/translation-unit';
 import { XliffDocument } from './../../model/xliff-document';
 import { ValidStates } from './../../model/xliff-version-abstraction';
 import { XliffService } from './../../services/xliff.service';
@@ -57,27 +58,24 @@ export class SyncComponent implements OnInit {
       this.alignGeneraInformation(this.latest, this.align);
       const existingTranslationUnits = [...this.align.translationUnits];
       this.latest.translationUnits.forEach((translationUnit) => {
-        let state: string = ValidStates.final;
         const existingTranslationUnit = existingTranslationUnits.find(
           (existingCandidate) => existingCandidate.id === translationUnit.id
         );
-        if (!existingTranslationUnit) {
-          state = ValidStates.initial;
-        } else {
+        if (existingTranslationUnit) {
           translationUnit.fragments.forEach((fragment, index) => {
             const existingFragment =
               index < existingTranslationUnit.fragments.length
                 ? existingTranslationUnit.fragments[index]
                 : undefined;
-            if (existingFragment?.source !== fragment.source) {
-              state = ValidStates.initial;
-            }
             this.latest?.setTranslation(
               translationUnit.id,
               index,
               existingFragment?.target ?? fragment.source
             );
-            this.latest?.setState(translationUnit.id, state);
+            this.latest?.setState(
+              translationUnit.id,
+              this.calculateState(translationUnit, existingTranslationUnit)
+            );
           });
         }
       });
@@ -92,6 +90,25 @@ export class SyncComponent implements OnInit {
       latest.setTargetLanguage(align?.targetLanguage ?? 'en');
       latest.filename = align?.filename ?? 'updated.xliff';
     }
+  }
+
+  private calculateState(
+    latestTranslationUnit: TranslationUnit,
+    existingTranslationUnit: TranslationUnit | undefined | null
+  ): string {
+    if (
+      latestTranslationUnit.fragments?.length ===
+        existingTranslationUnit?.fragments?.length &&
+      latestTranslationUnit.fragments
+        ?.map((fragment) => fragment.source)
+        .join('#') ===
+        existingTranslationUnit?.fragments
+          ?.map((fragment) => fragment.source)
+          .join('#')
+    ) {
+      return ValidStates.final;
+    }
+    return ValidStates.initial;
   }
 
   private alignAndNavigateWhenReady(): void {

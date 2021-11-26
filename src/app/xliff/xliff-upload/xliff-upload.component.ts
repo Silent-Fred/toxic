@@ -15,8 +15,6 @@ export class XliffUploadComponent {
 
   private filename?: string;
 
-  constructor() {}
-
   fileDropped(fileList?: FileList): void {
     this.filename = 'nemo';
     if (fileList && fileList.length > 0) {

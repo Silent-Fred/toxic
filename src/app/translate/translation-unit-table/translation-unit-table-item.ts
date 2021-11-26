@@ -33,7 +33,8 @@ export const sortReviewMode: (
   a: TranslationUnitTableItem,
   b: TranslationUnitTableItem
 ) => number = (a, b) => {
-  const sortByReview =
-    a.flaggedForReview === b.flaggedForReview ? 0 : a.flaggedForReview ? -1 : 1;
-  return sortByReview !== 0 ? sortByReview : sortByTranslationUnitId(a, b);
+  if (a.flaggedForReview === b.flaggedForReview) {
+    return sortByTranslationUnitId(a, b);
+  }
+  return a.flaggedForReview ? -1 : 1;
 };
