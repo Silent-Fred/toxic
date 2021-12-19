@@ -12,38 +12,38 @@ import { ToxicRoutes } from './../../shared/shared.module';
   styleUrls: ['./sync.component.scss'],
 })
 export class SyncComponent implements OnInit {
-  private latest?: XliffDocument;
-  private align?: XliffDocument;
+  private latestDocument?: XliffDocument;
+  private alignDocument?: XliffDocument;
 
   constructor(private xliffService: XliffService, private router: Router) {}
 
   ngOnInit(): void {
-    this.latest = undefined;
-    this.align = undefined;
+    this.latestDocument = undefined;
+    this.alignDocument = undefined;
   }
 
   get latestIsDefined(): boolean {
-    return this.latest !== undefined;
+    return this.latestDocument !== undefined;
   }
 
   get alignIsDefined(): boolean {
-    return this.align !== undefined;
+    return this.alignDocument !== undefined;
   }
 
   get latestFilename(): string | undefined {
-    return this.latest?.filename;
+    return this.latestDocument?.filename;
   }
 
   get alignFilename(): string | undefined {
-    return this.align?.filename;
+    return this.alignDocument?.filename;
   }
 
   onUploadLatest(event: XliffDocument): void {
-    this.latest = event;
+    this.latestDocument = event;
     this.alignAndNavigateWhenReady();
   }
   onUploadAlign(event: XliffDocument): void {
-    this.align = event;
+    this.alignDocument = event;
     this.alignAndNavigateWhenReady();
   }
 
@@ -54,10 +54,10 @@ export class SyncComponent implements OnInit {
    * items. Makes adding and removing items unnecessary.
    */
   alignDocuments(): void {
-    if (this.latest && this.align) {
-      this.alignGeneraInformation(this.latest, this.align);
-      const existingTranslationUnits = [...this.align.translationUnits];
-      this.latest.translationUnits.forEach((translationUnit) => {
+    if (this.latestDocument && this.alignDocument) {
+      this.alignGeneraInformation(this.latestDocument, this.alignDocument);
+      const existingTranslationUnits = [...this.alignDocument.translationUnits];
+      this.latestDocument.translationUnits.forEach((translationUnit) => {
         const existingTranslationUnit = existingTranslationUnits.find(
           (existingCandidate) => existingCandidate.id === translationUnit.id
         );
@@ -67,12 +67,12 @@ export class SyncComponent implements OnInit {
               index < existingTranslationUnit.fragments.length
                 ? existingTranslationUnit.fragments[index]
                 : undefined;
-            this.latest?.setTranslation(
+            this.latestDocument?.setTranslation(
               translationUnit.id,
               index,
               existingFragment?.target ?? fragment.source
             );
-            this.latest?.setState(
+            this.latestDocument?.setState(
               translationUnit.id,
               this.calculateState(translationUnit, existingTranslationUnit)
             );
@@ -97,24 +97,41 @@ export class SyncComponent implements OnInit {
     existingTranslationUnit: TranslationUnit | undefined | null
   ): string {
     if (
+      !this.isBasicallyTheSameSourceAsBefore(
+        latestTranslationUnit,
+        existingTranslationUnit
+      )
+    ) {
+      return ValidStates.initial;
+    }
+    return (
+      existingTranslationUnit?.fragments?.[0]?.state ?? ValidStates.initial
+    );
+  }
+
+  private isBasicallyTheSameSourceAsBefore(
+    latestTranslationUnit: TranslationUnit,
+    existingTranslationUnit: TranslationUnit | undefined | null
+  ): boolean {
+    if (!existingTranslationUnit) {
+      return false;
+    }
+    return (
       latestTranslationUnit.fragments?.length ===
-        existingTranslationUnit?.fragments?.length &&
+        existingTranslationUnit.fragments?.length &&
       latestTranslationUnit.fragments
         ?.map((fragment) => fragment.source)
         .join('#') ===
-        existingTranslationUnit?.fragments
+        existingTranslationUnit.fragments
           ?.map((fragment) => fragment.source)
           .join('#')
-    ) {
-      return ValidStates.final;
-    }
-    return ValidStates.initial;
+    );
   }
 
   private alignAndNavigateWhenReady(): void {
-    if (this.latest && this.align) {
+    if (this.latestDocument && this.alignDocument) {
       this.alignDocuments();
-      this.xliffService.use(this.latest);
+      this.xliffService.use(this.latestDocument);
       this.router.navigate([ToxicRoutes.translate]);
     }
   }

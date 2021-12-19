@@ -34,7 +34,7 @@ const xliffAlign = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasi
     <body>
       <trans-unit id="some.silly.id" datatype="html">
         <source>The source of truth <x id="subThingyId" equiv-text="is complex" /></source>
-        <target>The translated source of truth <x id="subThingyId" equiv-text="is a complex translation" /></target>
+        <target state="translated">The translated source of truth <x id="subThingyId" equiv-text="is a complex translation" /></target>
       </trans-unit>
       <trans-unit id="some.sillier.id" datatype="html">
         <source>Just so we have more than one source</source>
@@ -94,7 +94,7 @@ describe('SyncComponent', () => {
       latest.translationUnits.find(
         (translationUnit) => translationUnit.id === 'some.silly.id'
       )?.fragments[0].state
-    ).toEqual('final');
+    ).toEqual('translated');
     expect(
       latest.translationUnits.find(
         (translationUnit) => translationUnit.id === 'some.sillier.id'
