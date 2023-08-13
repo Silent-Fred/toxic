@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatSort } from '@angular/material/sort';
@@ -34,8 +34,8 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
 
   reviewMode = false;
 
-  form!: UntypedFormGroup;
-  private formGroups: { [key: string]: UntypedFormGroup } = {};
+  form!: FormGroup;
+  private formGroups: { [key: string]: FormGroup } = {};
 
   private _targetLanguage?: string;
   get targetLanguage(): string | undefined {
@@ -50,7 +50,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   constructor(
-    private formBuilder: UntypedFormBuilder,
+    private formBuilder: FormBuilder,
     private xliffService: XliffService
   ) {
     this.dataSource = new TranslationUnitTableDataSource();
@@ -62,7 +62,10 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
       this._targetLanguage = this.xliffService.currentDocument?.targetLanguage;
     }
     this.form = this.formBuilder.group({
-      inputTargetLanguage: new UntypedFormControl(this.targetLanguage, []),
+      inputTargetLanguage: new FormControl<string | null | undefined>(
+        this.targetLanguage,
+        []
+      ),
       translationUnits: this.formBuilder.array([]),
     });
     this.form.get('inputTargetLanguage')?.valueChanges.subscribe((event) => {
@@ -103,15 +106,15 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   // be rebuilt to avoid piling up form controls for every single item in the
   // table even if it is not in the current view and will also maybe not be
   // touched
-  get translationUnits(): UntypedFormArray {
-    return this.form.get('translationUnits') as UntypedFormArray;
+  get translationUnits(): FormArray {
+    return this.form.get('translationUnits') as FormArray;
   }
 
-  formGroup(id: string): UntypedFormGroup {
+  formGroup(id: string): FormGroup {
     let formGroup = this.formGroups[id];
     if (!formGroup) {
       const translationUnitItem = this.dataSource.findItemById(id);
-      const targetFormControl = new UntypedFormControl({
+      const targetFormControl = new FormControl<string | undefined | null>({
         value: translationUnitItem?.target,
         disabled: translationUnitItem?.unsupported === true,
       });
