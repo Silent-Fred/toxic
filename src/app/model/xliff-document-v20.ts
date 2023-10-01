@@ -14,6 +14,11 @@ export class XliffVersion20 implements XliffVersionAbstraction {
     return (xliffNode as Element)?.getAttribute('version') === '2.0';
   }
 
+  getSourceLanguage(xliffDocument: Document): string {
+    const xliffNode = this.findFirstNodeWithName('xliff', xliffDocument);
+    return (xliffNode as Element)?.getAttribute('srcLang') || '';
+  }
+
   getTargetLanguage(xliffDocument: Document): string {
     const xliffNode = this.findFirstNodeWithName('xliff', xliffDocument);
     return (xliffNode as Element)?.getAttribute('trgLang') || '';

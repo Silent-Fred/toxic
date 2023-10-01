@@ -3,7 +3,7 @@
   <div class="left-and-right">
     <div>
       <span>
-        <mat-form-field appearance="standard">
+        <mat-form-field>
           <mat-label>Target Language</mat-label>
           <input matInput placeholder="the translations are for the language..."
             formControlName="inputTargetLanguage" />
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <mat-form-field appearance="standard" class="full-width">
+  <mat-form-field class="full-width">
     <mat-label>Filter</mat-label>
     <input matInput (keyup)="applyFilter($event)" placeholder="words you are looking for..." #input />
   </mat-form-field>
@@ -48,26 +48,34 @@
                   </ng-container>
                   <span class="label id">ID</span><span class="id">{{ item.translationUnitId }}</span>
                 </div>
-                <div class="reviewActions">
-                  <button *ngIf="item.flaggedForReview" mat-stroked-button color="accent"
-                    aria-label="Looks good to me button" (click)="looksGoodToMe(item)">
-                    <mat-icon svgIcon="checkmark"></mat-icon>Looks good to me
-                  </button>
-                  <button *ngIf="!item.flaggedForReview" mat-stroked-button color="primary"
-                    aria-label="Request review button" (click)="requestReview(item)">
-                    <mat-icon svgIcon="flag"></mat-icon>Should be reviewed
-                  </button>
-                </div>
               </div>
 
               <div [ngClass]="{sourceAndTargetContainer: columnLayout}">
-                <div [ngClass]="{sourceAndTarget: columnLayout}">{{ item.source }}</div>
+                <div [ngClass]="{sourceAndTarget: columnLayout}"><span class="source">{{ item.source }}</span></div>
                 <div [ngClass]="{sourceAndTarget: columnLayout}">
-                  <mat-form-field appearance="standard" class="full-width">
-                    <mat-icon matSuffix *ngIf="item.flaggedForReview" svgIcon="flag"></mat-icon>
-                    <textarea matInput formControlName="target" cdkTextareaAutosize cdkAutosizeMinRows="1"
-                      cdkAutosizeMaxRows="5"></textarea>
-                  </mat-form-field>
+                  <div class="targetAndAction">
+                    <div class="targetFormField">
+                      <mat-form-field class="full-width">
+                        <mat-icon matSuffix *ngIf="item.flaggedForReview" svgIcon="flag"></mat-icon>
+                        <textarea matInput formControlName="target" cdkTextareaAutosize cdkAutosizeMinRows="1"
+                          cdkAutosizeMaxRows="5"></textarea>
+                      </mat-form-field>
+                    </div>
+                    <div class="reviewActions">
+                      <button *ngIf="item.flaggedForReview" mat-icon-button color="accent"
+                        aria-label="Looks good to me button" (click)="looksGoodToMe(item)">
+                        <mat-icon svgIcon="checkmark"></mat-icon>
+                      </button>
+                      <button *ngIf="!item.flaggedForReview" mat-icon-button color="primary"
+                        aria-label="Request review button" (click)="requestReview(item)">
+                        <mat-icon svgIcon="flag"></mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" aria-label="Use an automatic translation"
+                        (click)="useAutomaticTranslation(item)">
+                        <mat-icon svgIcon="magic-wand"></mat-icon>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div *ngIf="showHints(item)" class="hintsContainer">
@@ -87,7 +95,7 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
 
-      <mat-paginator #paginator [length]="dataSource?.filtered?.length" [pageIndex]="0" [pageSize]="5"
+      <mat-paginator #paginator [length]="dataSource.filtered.length" [pageIndex]="0" [pageSize]="5"
         [pageSizeOptions]="[5, 10, 20]" aria-label="Select page">
       </mat-paginator>
     </div>

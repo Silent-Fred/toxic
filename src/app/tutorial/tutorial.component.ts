@@ -24,11 +24,11 @@ const tutorial = `<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:
     </trans-unit>
     <trans-unit id="the.unique.identifiers.04" datatype="html">
       <source>A (flagged) translation seems already okay?</source>
-      <target state="new">Simply click the button "Looks good to me" on the right side.</target>
+      <target state="new">Simply click the button with the check mark on the right side.</target>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.05" datatype="html">
       <source>You would like to flag a translation for (another) review?</source>
-      <target state="final">Simply click the button "Should be reviewed" on the right side.</target>
+      <target state="final">Simply click the button with the flag symbol next to the input field.</target>
     </trans-unit>
     <trans-unit id="the.unique.identifiers.06" datatype="html">
       <source>The number of translation units can quickly become overwhelming so that filtering would be helpful.</source>

@@ -2,9 +2,10 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
+import { take } from 'rxjs';
 import { ValidStates } from 'src/app/model/xliff-version-abstraction';
+import { LibretranslateService } from 'src/app/services/libretranslate.service';
 import { XliffService } from './../../services/xliff.service';
 import { TranslationUnitTableDataSource } from './translation-unit-table-datasource';
 import { TranslationUnitTableItem } from './translation-unit-table-item';
@@ -16,7 +17,6 @@ import { TranslationUnitTableItem } from './translation-unit-table-item';
 })
 export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<TranslationUnitTableItem>;
   dataSource: TranslationUnitTableDataSource;
 
@@ -42,6 +42,11 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
     return this._targetLanguage;
   }
 
+  private _sourceLanguage?: string;
+  get sourceLanguage(): string | undefined {
+    return this._sourceLanguage;
+  }
+
   get dubiousLanguage(): boolean {
     const language = this.form.get('inputTargetLanguage')?.value;
     return language
@@ -51,7 +56,8 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private xliffService: XliffService
+    private xliffService: XliffService,
+    private libretranslateService: LibretranslateService
   ) {
     this.dataSource = new TranslationUnitTableDataSource();
   }
@@ -59,10 +65,14 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     if (this.xliffService.currentDocument) {
       this.dataSource?.use(this.xliffService.currentDocument);
+      this._sourceLanguage = this.xliffService.currentDocument?.sourceLanguage;
       this._targetLanguage = this.xliffService.currentDocument?.targetLanguage;
     }
     this.form = this.formBuilder.group({
-      inputTargetLanguage: new FormControl(this.targetLanguage, []),
+      inputTargetLanguage: new FormControl<string | null | undefined>(
+        this.targetLanguage,
+        []
+      ),
       translationUnits: this.formBuilder.array([]),
     });
     this.form.get('inputTargetLanguage')?.valueChanges.subscribe((event) => {
@@ -74,7 +84,6 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
     this.table.dataSource = this.dataSource;
   }
@@ -111,7 +120,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
     let formGroup = this.formGroups[id];
     if (!formGroup) {
       const translationUnitItem = this.dataSource.findItemById(id);
-      const targetFormControl = new FormControl({
+      const targetFormControl = new FormControl<string | undefined | null>({
         value: translationUnitItem?.target,
         disabled: translationUnitItem?.unsupported === true,
       });
@@ -156,6 +165,19 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
       item.translationUnitId,
       ValidStates.translated
     );
+  }
+
+  useAutomaticTranslation(item: TranslationUnitTableItem): void {
+    this.libretranslateService
+      .translate(item.source, this.sourceLanguage, this.targetLanguage)
+      .pipe(take(1))
+      .subscribe((automaticTranslation) => {
+        if (automaticTranslation?.translatedText) {
+          item.target = automaticTranslation?.translatedText;
+          this.formGroup(item.id)?.controls?.target?.setValue(item.target);
+          // ...and let the change detection do the rest
+        }
+      });
   }
 
   toggleReviewMode(event: MatSlideToggleChange): void {

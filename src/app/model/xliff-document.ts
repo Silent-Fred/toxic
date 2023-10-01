@@ -10,6 +10,12 @@ export class XliffDocument {
 
   filename?: string;
 
+  get sourceLanguage(): string | undefined {
+    return this.xliffDocument
+      ? this.xliffVersionAbstraction?.getSourceLanguage(this.xliffDocument)
+      : '';
+  }
+
   get targetLanguage(): string | undefined {
     return this.xliffDocument
       ? this.xliffVersionAbstraction?.getTargetLanguage(this.xliffDocument)

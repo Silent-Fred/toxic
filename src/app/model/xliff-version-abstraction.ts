@@ -10,6 +10,7 @@ export const ValidStates = {
 export interface XliffVersionAbstraction {
   canHandle(xliffDocument: Document): boolean;
   getTranslationUnits(xliffDocument: Document): TranslationUnit[];
+  getSourceLanguage(xliffDocument: Document): string;
   getTargetLanguage(xliffDocument: Document): string;
   setTargetLanguage(xliffDocument: Document, language: string): void;
   setTranslation(node: Node, fragmentIndex: number, translation: string): void;

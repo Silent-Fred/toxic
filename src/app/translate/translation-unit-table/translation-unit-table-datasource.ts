@@ -1,6 +1,5 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ValidStates } from 'src/app/model/xliff-version-abstraction';
@@ -20,7 +19,6 @@ import {
  */
 export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTableItem> {
   paginator: MatPaginator | undefined;
-  sort: MatSort | undefined;
 
   private readonly reviewedStates: string[] = [
     ValidStates.final,
@@ -40,6 +38,8 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
     this.reviewMode$.next(value);
   }
 
+  private proceedWithReview$ = new BehaviorSubject<string>('');
+
   constructor() {
     super();
   }
@@ -50,14 +50,14 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<TranslationUnitTableItem[]> {
-    if (this.paginator /* && this.sort */) {
+    if (this.paginator) {
       // Combine everything that affects the rendered data into one update
       // stream for the data-table to consume.
       return merge(
         this.filtered$,
         this.reviewMode$,
-        this.paginator.page
-        // this.sort.sortChange
+        this.paginator.page,
+        this.proceedWithReview$
       ).pipe(
         map(() => {
           return this.getPagedData(this.getSortedData([...this.filtered]));
@@ -111,6 +111,9 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
 
   confirmReview(id: string): void {
     this.setStateConsideringSiblings(id, ValidStates.final);
+    if (this.reviewMode$.value) {
+      this.proceedWithReview$.next(id);
+    }
   }
 
   findItemById(id: string): TranslationUnitTableItem | undefined {
