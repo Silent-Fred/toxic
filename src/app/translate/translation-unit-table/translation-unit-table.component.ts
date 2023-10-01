@@ -5,7 +5,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatTable } from '@angular/material/table';
 import { take } from 'rxjs';
 import { ValidStates } from 'src/app/model/xliff-version-abstraction';
-import { LibretranslateService } from 'src/app/services/libretranslate.service';
+import { LibreTranslateService } from 'src/app/services/libre-translate.service';
 import { XliffService } from './../../services/xliff.service';
 import { TranslationUnitTableDataSource } from './translation-unit-table-datasource';
 import { TranslationUnitTableItem } from './translation-unit-table-item';
@@ -30,6 +30,17 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
 
   get displayedColumns(): string[] {
     return ['translation'];
+  }
+
+  get automaticTranslationAvailable(): boolean {
+    return this.libreTranslateService.available;
+  }
+
+  get languagesSupported(): boolean {
+    return this.libreTranslateService.languagesSupported(
+      this.sourceLanguage,
+      this.targetLanguage
+    );
   }
 
   reviewMode = false;
@@ -57,7 +68,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   constructor(
     private formBuilder: FormBuilder,
     private xliffService: XliffService,
-    private libretranslateService: LibretranslateService
+    private libreTranslateService: LibreTranslateService
   ) {
     this.dataSource = new TranslationUnitTableDataSource();
   }
@@ -168,7 +179,7 @@ export class TranslationUnitTableComponent implements OnInit, AfterViewInit {
   }
 
   useAutomaticTranslation(item: TranslationUnitTableItem): void {
-    this.libretranslateService
+    this.libreTranslateService
       .translate(item.source, this.sourceLanguage, this.targetLanguage)
       .pipe(take(1))
       .subscribe((automaticTranslation) => {

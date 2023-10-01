@@ -70,8 +70,9 @@
                         aria-label="Request review button" (click)="requestReview(item)">
                         <mat-icon svgIcon="flag"></mat-icon>
                       </button>
-                      <button mat-icon-button color="primary" aria-label="Use an automatic translation"
-                        (click)="useAutomaticTranslation(item)">
+                      <button mat-icon-button *ngIf="automaticTranslationAvailable"
+                        [disabled]="languagesSupported === false" color="primary"
+                        aria-label="Use an automatic translation" (click)="useAutomaticTranslation(item)">
                         <mat-icon svgIcon="magic-wand"></mat-icon>
                       </button>
                     </div>
