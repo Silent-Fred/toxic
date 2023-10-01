@@ -8,6 +8,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { LibreTranslateService } from 'src/app/services/libre-translate.service';
 import { TranslationUnitTableComponent } from './translation-unit-table.component';
 
 @Component({
@@ -22,23 +23,22 @@ describe('TranslationUnitTableComponent', () => {
   let component: TranslationUnitTableComponent;
   let fixture: ComponentFixture<TranslationUnitTableComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [TranslationUnitTableComponent, MockedMatIconComponent],
-        imports: [
-          NoopAnimationsModule,
-          MatPaginatorModule,
-          MatSortModule,
-          MatTableModule,
-          MatInputModule,
-          MatSlideToggleModule,
-          ReactiveFormsModule,
-          RouterTestingModule,
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [TranslationUnitTableComponent, MockedMatIconComponent],
+      imports: [
+        NoopAnimationsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTableModule,
+        MatInputModule,
+        MatSlideToggleModule,
+        ReactiveFormsModule,
+        RouterTestingModule,
+      ],
+      providers: [{ provide: LibreTranslateService, useValue: {} }],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TranslationUnitTableComponent);
