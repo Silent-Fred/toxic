@@ -79,13 +79,18 @@
                   </div>
                 </div>
               </div>
-              <div *ngIf="showHints(item)" class="hintsContainer">
-                <span class="label hints">Translation hints</span>
+              <div class="hintsContainer">
+                <span *ngIf="showHints(item)" class="label hints">Translation hints</span>
                 <div *ngIf="showMeaning(item)">
                   <span class="label meaning">Meaning</span><span class="meaning">{{ item.meaning }}</span>
                 </div>
                 <div *ngIf="showDescription(item)">
                   <span class="label description">Description</span><span class="description">{{ item.description
+                    }}</span>
+                </div>
+                <div *ngIf="item.occurrences > 0">
+                  <span class="label occurrences">Occurrences in application</span><span class="occurrences">{{
+                    item.occurrences
                     }}</span>
                 </div>
               </div>

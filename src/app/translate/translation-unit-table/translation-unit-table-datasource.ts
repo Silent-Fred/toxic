@@ -193,6 +193,7 @@ export class TranslationUnitTableDataSource extends DataSource<TranslationUnitTa
         fragmented: translationUnit.fragments.length > 1,
         fragmentPosition: this.fragmentPosition(translationUnit, index),
         unsupported: translationUnit.unsupported,
+        occurrences: translationUnit.occurrences,
       })
     );
     return items;

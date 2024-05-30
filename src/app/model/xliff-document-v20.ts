@@ -89,6 +89,7 @@ export class XliffVersion20 implements XliffVersionAbstraction {
         meaning: this.evaluateMeaning(unitNode),
         description: this.evaluateDescription(unitNode),
         unsupported,
+        occurrences: this.countOccurrences(unitNode),
       } as TranslationUnit,
     ];
   }
@@ -181,6 +182,16 @@ export class XliffVersion20 implements XliffVersionAbstraction {
       }
     });
     return note;
+  }
+
+  private countOccurrences(unitNode: Node): number {
+    const notes = this.findFirstChildWithNodeName(unitNode, 'notes');
+    return Array.from(notes?.childNodes ?? [])
+      .filter((childNode) => childNode.nodeName === 'note')
+      .filter(
+        (childNode) =>
+          (childNode as Element).getAttribute('category') === 'location'
+      ).length;
   }
 
   private containsUnsupportedContent(segmentNode?: Node): boolean {

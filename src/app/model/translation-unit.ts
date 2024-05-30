@@ -12,4 +12,5 @@ export interface TranslationUnit {
   meaning?: string;
   description?: string;
   unsupported: boolean;
+  occurrences?: number;
 }

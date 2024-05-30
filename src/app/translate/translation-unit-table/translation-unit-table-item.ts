@@ -17,6 +17,7 @@ export interface TranslationUnitTableItem {
   fragmented?: boolean;
   fragmentPosition?: string;
   unsupported?: boolean;
+  occurrences?: number;
 }
 
 export const sortByTranslationUnitId: (
